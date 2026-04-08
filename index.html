@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>분리형 400자 원고지</title>
+    <title>표준 400자 원고지 에디터</title>
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo&display=swap" rel="stylesheet">
     <style>
         :root {
             --grid-color: #ff6b6b;
-            --text-size: 20px;
+            --cell-size: 8.5mm; /* A4 폭에 맞춘 최적 사이즈 */
         }
 
         body { margin: 0; padding: 0; background: #525659; font-family: 'Nanum Myeongjo', serif; }
@@ -16,62 +16,58 @@
         /* 상단 툴바 */
         #toolbar {
             position: fixed; top: 0; width: 100%; height: 50px;
-            background: #ffffff; border-bottom: 1px solid #ddd;
+            background: #fff; border-bottom: 1px solid #ddd;
             display: flex; justify-content: space-between; align-items: center;
             padding: 0 15px; z-index: 1000; box-sizing: border-box;
         }
 
         .btn { cursor: pointer; padding: 6px 12px; border: 1px solid #ccc; background: #fff; border-radius: 4px; font-size: 14px; }
 
-        /* 페이지 컨테이너 */
-        #app { margin-top: 60px; display: flex; flex-direction: column; align-items: center; gap: 20px; padding-bottom: 50px; }
+        /* 페이지 레이아웃 */
+        #app { margin-top: 70px; display: flex; flex-direction: column; align-items: center; gap: 30px; padding-bottom: 50px; }
 
-        /* A4 용지 설정 */
         .page {
             width: 210mm; height: 297mm;
-            background: #fff; padding: 25mm 20mm; box-sizing: border-box;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            background: #fff; box-shadow: 0 0 15px rgba(0,0,0,0.3);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center; /* 중앙 정렬로 남는 여백 처리 */
+            box-sizing: border-box;
+            page-break-after: always;
+        }
+
+        .grid-container {
             display: grid;
-            grid-template-columns: repeat(20, 1fr); /* 가로 20칸 */
-            grid-template-rows: repeat(20, 1fr);    /* 세로 20칸 */
-            gap: 0; border: 1px solid var(--grid-color);
+            grid-template-columns: repeat(20, var(--cell-size));
+            grid-template-rows: repeat(20, var(--cell-size));
+            border: 1.5px solid var(--grid-color);
+            background-color: var(--grid-color);
+            gap: 0.5px; /* 선 두께 대용 */
         }
 
         .cell {
-            border: 0.5px solid var(--grid-color);
+            background: #fff;
+            width: var(--cell-size);
+            height: var(--cell-size);
             display: flex; justify-content: center; align-items: center;
-            font-size: var(--text-size); font-weight: bold;
-            outline: none; cursor: text;
-            width: 100%; height: 100%; box-sizing: border-box;
-            line-height: 1;
+            font-size: 18px; /* 글자 크기 고정 (원고지 규격) */
+            font-weight: 500;
+            outline: none;
+            cursor: text;
+            box-sizing: border-box;
         }
 
         .cell:focus { background-color: #fff9db; }
 
-        /* 공유 메뉴 */
-        .dropdown { position: relative; }
-        .dropdown-content {
-            display: none; position: absolute; right: 0; top: 100%;
-            background: white; border: 1px solid #ddd; min-width: 150px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .dropdown:hover .dropdown-content { display: block; }
-        .dropdown-content button {
-            width: 100%; padding: 12px; border: none; background: none; text-align: left; cursor: pointer;
-        }
-        .dropdown-content button:hover { background: #f5f5f5; }
-
         @media print {
             body { background: none; }
             #toolbar { display: none; }
-            #app { margin: 0; padding: 0; gap: 0; }
-            .page { box-shadow: none; margin: 0; page-break-after: always; border: 0.5px solid var(--grid-color); }
+            #app { margin: 0; padding: 0; }
+            .page { box-shadow: none; margin: 0; }
         }
 
-        /* 모바일 대응 */
+        /* 모바일 스케일 조정 */
         @media (max-width: 210mm) {
-            #app { transform: scale(0.45); transform-origin: top center; margin-top: 20px; }
-            #toolbar { transform: scale(1); }
+            #app { transform: scale(0.45); transform-origin: top center; margin-top: 10px; }
         }
     </style>
 </head>
@@ -79,66 +75,57 @@
 
 <header id="toolbar">
     <button class="btn" onclick="newDocument()">📄 새 원고지</button>
-    <div>
-        글자 크기: 
-        <select id="fontSize" onchange="changeFontSize(this.value)">
-            <option value="16px">작게</option>
-            <option value="20px" selected>보통</option>
-            <option value="26px">크게</option>
-        </select>
-    </div>
-    <div class="dropdown">
-        <button class="btn">공유 메뉴 ▾</button>
-        <div class="dropdown-content">
-            <button onclick="window.print()">🖨️ PDF 내려받기 / 인쇄</button>
-            <button onclick="copyURL()">🔗 주소 복사하기</button>
-            <button onclick="copyText()">📝 텍스트만 복사</button>
-        </div>
-    </div>
+    <div id="fontIndicator" style="font-size: 14px; color: #666;">표준 400자 (20x20)</div>
+    <div class="btn" onclick="window.print()">공유 / PDF 저장</div>
 </header>
 
-<div id="app">
-    </div>
+<div id="app"></div>
 
 <script>
     const app = document.getElementById('app');
-    const CELLS_PER_PAGE = 400;
-    let totalCellsCount = 0;
+    const COLS = 20;
+    const ROWS = 20;
+    const CELLS_PER_PAGE = COLS * ROWS;
+    let cellCounter = 0;
 
-    // 1. 초기 페이지 생성
     function createPage() {
         const page = document.createElement('div');
         page.className = 'page';
+        
+        const grid = document.createElement('div');
+        grid.className = 'grid-container';
+
         for (let i = 0; i < CELLS_PER_PAGE; i++) {
             const cell = document.createElement('div');
             cell.className = 'cell';
             cell.contentEditable = "true";
-            cell.dataset.index = totalCellsCount++;
-            
-            // 한 글자 제한 및 다음 칸 이동
-            cell.addEventListener('input', handleInput);
-            // 백스페이스 감지
+            cell.dataset.index = cellCounter++;
+
+            cell.addEventListener('compositionend', handleInput); // 한글 조합 완료 시
+            cell.addEventListener('input', (e) => {
+                if(!e.isComposing) handleInput(e); // 일반 문자/공백 입력 시
+            });
             cell.addEventListener('keydown', handleKeyDown);
-            
-            page.appendChild(cell);
+
+            grid.appendChild(cell);
         }
+        page.appendChild(grid);
         app.appendChild(page);
     }
 
-    // 2. 입력 핸들러
     function handleInput(e) {
         const cell = e.target;
+        const index = parseInt(cell.dataset.index);
+
         if (cell.innerText.length > 0) {
-            // 첫 글자만 남기고 삭제 (초/중/종성 분리 입력 유지)
+            // 한 글자만 남기기 (완성형)
             cell.innerText = cell.innerText.trim().charAt(0);
             
-            // 마지막 칸이면 새 페이지 생성
-            if (cell.dataset.index == totalCellsCount - 1) {
-                createPage();
-            }
-            
+            // 마지막 칸이면 새 페이지
+            if (index === cellCounter - 1) createPage();
+
             // 다음 칸으로 이동
-            const next = getCellByIndex(parseInt(cell.dataset.index) + 1);
+            const next = document.querySelector(`.cell[data-index="${index + 1}"]`);
             if (next) {
                 next.focus();
                 next.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -147,79 +134,62 @@
         autoSave();
     }
 
-    // 3. 키다운 핸들러 (백스페이스 처리)
     function handleKeyDown(e) {
         const cell = e.target;
         const index = parseInt(cell.dataset.index);
 
-        if (e.key === 'Backspace') {
-            if (cell.innerText === '' && index > 0) {
-                e.preventDefault();
-                const prev = getCellByIndex(index - 1);
-                if (prev) {
-                    prev.innerText = '';
-                    prev.focus();
-                    prev.scrollIntoView({ behavior: "smooth", block: "center" });
-                }
+        // 1. 엔터 키: 다음 줄 첫 칸으로 이동
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const currentLine = Math.floor(index / COLS);
+            const nextLineFirstIndex = (currentLine + 1) * COLS;
+            
+            if (nextLineFirstIndex >= cellCounter) createPage();
+            
+            const nextLineCell = document.querySelector(`.cell[data-index="${nextLineFirstIndex}"]`);
+            if (nextLineCell) nextLineCell.focus();
+        }
+
+        // 2. 백스페이스: 앞 칸으로 이동하며 지우기
+        if (e.key === 'Backspace' && cell.innerText === '' && index > 0) {
+            e.preventDefault();
+            const prev = document.querySelector(`.cell[data-index="${index - 1}"]`);
+            if (prev) {
+                prev.innerText = '';
+                prev.focus();
             }
         }
     }
 
-    function getCellByIndex(index) {
-        return document.querySelector(`.cell[data-index="${index}"]`);
-    }
-
-    // 4. 자동 저장 (URL Hash)
     function autoSave() {
         const cells = document.querySelectorAll('.cell');
-        let content = Array.from(cells).map(c => c.innerText || " ").join("");
-        // 공백 최적화 (끝부분 공백 제거)
-        content = content.replace(/\s+$/, "");
+        const content = Array.from(cells).map(c => c.innerText || " ").join("").replace(/\s+$/, "");
         window.location.hash = encodeURIComponent(btoa(encodeURIComponent(content)));
     }
 
-    // 5. 불러오기
     function loadData() {
         if (window.location.hash) {
             try {
-                const encoded = decodeURIComponent(window.location.hash.substring(1));
-                const decoded = decodeURIComponent(atob(encoded));
-                
-                // 필요한 만큼 페이지 미리 생성
-                const requiredPages = Math.ceil(decoded.length / CELLS_PER_PAGE) || 1;
-                for(let i=0; i<requiredPages; i++) { if(i > 0) createPage(); }
+                const decoded = decodeURIComponent(atob(decodeURIComponent(window.location.hash.substring(1))));
+                const pagesNeeded = Math.ceil(decoded.length / CELLS_PER_PAGE) || 1;
+                for(let i=1; i < pagesNeeded; i++) createPage();
 
                 const cells = document.querySelectorAll('.cell');
                 decoded.split("").forEach((char, i) => {
                     if (cells[i]) cells[i].innerText = char === " " ? "" : char;
                 });
-            } catch (e) { console.error("로드 실패", e); }
+            } catch (e) {}
         }
     }
 
-    // 6. 기타 기능
     function newDocument() {
-        if (confirm("모든 내용이 초기화됩니다. 계속하시겠습니까?")) {
+        if (confirm("내용을 모두 지우고 새로 작성하시겠습니까?")) {
             window.location.hash = "";
             location.reload();
         }
     }
 
-    function changeFontSize(size) {
-        document.documentElement.style.setProperty('--text-size', size);
-    }
-
-    function copyURL() {
-        navigator.clipboard.writeText(window.location.href).then(() => alert("주소가 복사되었습니다!"));
-    }
-
-    function copyText() {
-        const cells = document.querySelectorAll('.cell');
-        const text = Array.from(cells).map(c => c.innerText || "").join("");
-        navigator.clipboard.writeText(text).then(() => alert("텍스트가 복사되었습니다!"));
-    }
-
-    // 실행
+    // 초기 실행
     createPage();
     loadData();
 </script>
