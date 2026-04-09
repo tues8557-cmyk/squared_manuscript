@@ -30,9 +30,7 @@ html, body {
 /* ===== TOOLBAR ===== */
 .toolbar {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   min-height: var(--toolbar-height);
   background: #2c2c2c;
   color: #fff;
@@ -62,14 +60,10 @@ html, body {
 
 .menu-toggle {
   display: none;
-  width: 42px;
-  min-width: 42px;
-  height: 40px;
+  width: 42px; min-width: 42px; height: 40px;
   padding: 0 !important;
-  font-size: 18px;
-  line-height: 1;
-  justify-content: center;
-  align-items: center;
+  font-size: 18px; line-height: 1;
+  justify-content: center; align-items: center;
   flex: 0 0 42px;
 }
 
@@ -107,11 +101,7 @@ html, body {
   justify-content: center;
   line-height: 1;
 }
-
-.toolbar button:hover,
-.toolbar select:hover {
-  background: #555;
-}
+.toolbar button:hover, .toolbar select:hover { background: #555; }
 
 .toolbar select {
   min-width: 150px;
@@ -125,9 +115,7 @@ html, body {
   border-color: #3498db !important;
   font-weight: 700;
 }
-.btn-primary:hover {
-  background: #3498db !important;
-}
+.btn-primary:hover { background: #3498db !important; }
 
 .color-set {
   display: flex;
@@ -141,10 +129,8 @@ html, body {
 }
 
 .color-btn {
-  width: 28px !important;
-  height: 28px !important;
-  min-width: 28px !important;
-  min-height: 28px !important;
+  width: 28px !important; height: 28px !important;
+  min-width: 28px !important; min-height: 28px !important;
   border-radius: 50% !important;
   padding: 0 !important;
   border: 2px solid #777 !important;
@@ -156,9 +142,9 @@ html, body {
   border-color: #fff !important;
   box-shadow: 0 0 0 2px rgba(255,255,255,0.18);
 }
-.color-red { background: #c0392b !important; }
+.color-red    { background: #c0392b !important; }
 .color-darkgray { background: #555555 !important; }
-.color-black { background: #222222 !important; }
+.color-black  { background: #222222 !important; }
 
 .zoom-control {
   display: inline-flex;
@@ -170,22 +156,15 @@ html, body {
   flex: 0 0 auto;
 }
 .zoom-control button {
-  border: none;
-  border-radius: 0;
+  border: none; border-radius: 0;
   background: transparent;
-  padding: 8px 10px;
-  min-width: 34px;
+  padding: 8px 10px; min-width: 34px;
 }
-.zoom-control button:hover {
-  background: #555;
-}
+.zoom-control button:hover { background: #555; }
 .zoom-label {
-  font-size: 12px;
-  min-width: 48px;
-  text-align: center;
-  padding: 0 6px;
-  pointer-events: none;
-  color: #f0f0f0;
+  font-size: 12px; min-width: 48px;
+  text-align: center; padding: 0 6px;
+  pointer-events: none; color: #f0f0f0;
 }
 
 .action-links {
@@ -196,24 +175,20 @@ html, body {
 }
 
 .tool-divider {
-  width: 1px;
-  height: 28px;
+  width: 1px; height: 28px;
   background: rgba(255,255,255,0.12);
   margin: 0 2px;
   flex: 0 0 auto;
 }
 
 /* ===== COMPACT MODE ===== */
-.toolbar.compact .menu-toggle {
-  display: inline-flex;
-}
+.toolbar.compact .menu-toggle { display: inline-flex; }
 
 .toolbar.compact .toolbar-menu {
   display: none;
   position: absolute;
   top: calc(var(--toolbar-height) + 6px);
-  left: 12px;
-  right: auto;
+  left: 12px; right: auto;
   width: min(360px, calc(100vw - 24px));
   background: #2c2c2c;
   padding: 12px;
@@ -227,10 +202,7 @@ html, body {
   max-height: calc(100vh - var(--toolbar-height) - 16px);
   overflow-y: auto;
 }
-
-.toolbar.compact .toolbar-menu.open {
-  display: flex;
-}
+.toolbar.compact .toolbar-menu.open { display: flex; }
 
 .toolbar.compact .toolbar-group {
   width: 100%;
@@ -238,97 +210,50 @@ html, body {
   grid-template-columns: 1fr;
   gap: 8px;
 }
-
 .toolbar.compact button,
 .toolbar.compact select {
-  width: 100%;
-  min-height: 42px;
-  font-size: 14px;
-  justify-content: center;
+  width: 100%; min-height: 42px;
+  font-size: 14px; justify-content: center;
 }
-
-.toolbar.compact select {
-  text-align: center;
-  text-align-last: center;
-}
-
-.toolbar.compact .color-set {
-  width: 100%;
-  justify-content: center;
-  padding: 8px 10px;
-}
-
+.toolbar.compact select { text-align: center; text-align-last: center; }
+.toolbar.compact .color-set { width: 100%; justify-content: center; padding: 8px 10px; }
 .toolbar.compact .color-btn {
-  width: 28px !important;
-  height: 28px !important;
-  min-width: 28px !important;
-  min-height: 28px !important;
-  flex: 0 0 28px !important;
-  border-radius: 50% !important;
+  width: 28px !important; height: 28px !important;
+  min-width: 28px !important; min-height: 28px !important;
+  flex: 0 0 28px !important; border-radius: 50% !important;
 }
-
-.toolbar.compact .zoom-control {
-  width: 100%;
-  justify-content: stretch;
-}
-
-.toolbar.compact .zoom-control button {
-  flex: 1 1 0;
-}
-
+.toolbar.compact .zoom-control { width: 100%; justify-content: stretch; }
+.toolbar.compact .zoom-control button { flex: 1 1 0; }
 .toolbar.compact .zoom-label {
   flex: 0 0 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
 }
-
 .toolbar.compact .action-links {
   width: 100%;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
+  display: grid; grid-template-columns: 1fr; gap: 8px;
 }
-
-.toolbar.compact .tool-divider {
-  display: none;
-}
-
-.toolbar:not(.compact) .menu-toggle {
-  display: none !important;
-}
+.toolbar.compact .tool-divider { display: none; }
+.toolbar:not(.compact) .menu-toggle { display: none !important; }
 
 @media (max-width: 640px) {
   .toolbar.compact .toolbar-menu {
-    left: 0;
-    right: 0;
+    left: 0; right: 0;
     top: calc(var(--toolbar-height) - 2px);
     width: auto;
     border-radius: 0 0 14px 14px;
-    border-left: none;
-    border-right: none;
+    border-left: none; border-right: none;
   }
 }
-
 @media (max-width: 480px) {
-  .toolbar-title {
-    font-size: 14px;
-  }
-  .menu-toggle {
-    width: 40px;
-    min-width: 40px;
-    height: 38px;
-    flex-basis: 40px;
-  }
+  .toolbar-title { font-size: 14px; }
+  .menu-toggle { width: 40px; min-width: 40px; height: 38px; flex-basis: 40px; }
 }
 
 /* ===== PAGE AREA ===== */
 .page-container {
   position: fixed;
   top: var(--toolbar-height);
-  left: 0;
-  right: 0;
-  bottom: 0;
+  left: 0; right: 0; bottom: 0;
   padding: 28px 0 60px;
   display: flex;
   flex-direction: column;
@@ -336,6 +261,8 @@ html, body {
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  /* 페이지 영역은 세로 스크롤 허용 */
+  touch-action: pan-y;
 }
 
 .zoom-wrapper {
@@ -353,8 +280,7 @@ html, body {
   background: #fff;
   box-shadow: 0 4px 20px rgba(0,0,0,0.15);
   position: relative;
-  width: 794px;
-  height: 1123px;
+  width: 794px; height: 1123px;
   padding: 60px 47px;
   flex-shrink: 0;
 }
@@ -365,20 +291,10 @@ html, body {
   align-items: baseline;
   padding: 0 4px 10px 0;
   font-family: 'Noto Serif KR', serif;
-  color: #333;
-  font-size: 14px;
-  gap: 6px;
+  color: #333; font-size: 14px; gap: 6px;
 }
-.page-header .page-no-label {
-  font-size: 12px;
-  color: #555;
-  letter-spacing: 1px;
-}
-.page-header .page-no {
-  font-size: 24px;
-  font-weight: 700;
-  color: #333;
-}
+.page-header .page-no-label { font-size: 12px; color: #555; letter-spacing: 1px; }
+.page-header .page-no { font-size: 24px; font-weight: 700; color: #333; }
 
 /* ===== GRID ===== */
 .grid-wrapper {
@@ -394,22 +310,24 @@ html, body {
   position: relative;
 }
 .grid-cell {
-  width: var(--cell-size);
-  height: var(--cell-size);
+  width: var(--cell-size); height: var(--cell-size);
   flex: 0 0 var(--cell-size);
   border-right: 1px solid var(--grid-color);
   box-sizing: border-box;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: center; justify-content: center;
   font-size: var(--font-size);
   font-family: var(--font-family);
   cursor: text;
   position: relative;
-  line-height: 1;
-  color: #111;
+  line-height: 1; color: #111;
   user-select: none;
   -webkit-user-select: none;
+  /*
+   * [수정] manipulation: 더블탭 줌 방지 + 탭 인식.
+   * none을 쓰면 스크롤 자체가 막히므로 manipulation 사용.
+   */
+  touch-action: manipulation;
 }
 .grid-row .grid-cell:last-child { border-right: none; }
 
@@ -417,11 +335,9 @@ html, body {
   position: absolute;
   right: calc(var(--cell-size) * -1);
   top: 0;
-  width: var(--cell-size);
-  height: var(--cell-size);
+  width: var(--cell-size); height: var(--cell-size);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: center; justify-content: center;
   font-size: var(--font-size);
   color: #111;
   pointer-events: none;
@@ -431,9 +347,7 @@ html, body {
 .grid-cell.cursor-cell::after {
   content: '';
   position: absolute;
-  left: 2px;
-  top: 15%;
-  bottom: 15%;
+  left: 2px; top: 15%; bottom: 15%;
   width: 2px;
   background: #2962ff;
   animation: blink 1s step-end infinite;
@@ -448,38 +362,45 @@ html, body {
   50% { opacity:0; }
 }
 
-/* ===== HIDDEN INPUT (iOS 수정) ===== */
 /*
-  [변경 이유]
-  1. z-index: -100 → 1  : iOS는 음수 z-index 요소에 포커스 불가
-  2. pointer-events: none 제거 : iOS가 포커스 불가 요소로 분류
-  3. font-size: 16px 추가 : 16px 미만이면 iOS가 자동 줌인하여 레이아웃 파괴
-*/
+ * ===== HIDDEN INPUT (iOS 한글 IME 핵심 수정) =====
+ *
+ * [변경 이유]
+ * 1. 1px×1px → 넓게(100vw×2.5em): iOS 한글 IME는 입력 필드가
+ *    충분한 크기여야 composition 이벤트를 발화함.
+ * 2. left: -100vw: 화면 왼쪽 밖에 배치. opacity:0만으로는
+ *    iOS가 실제 렌더링 가능 요소로 인식하지 못할 수 있음.
+ * 3. color/caret-color: transparent: 만약 보이더라도 내용 숨김.
+ * 4. z-index: 1, pointer-events 제거: 이전 수정에서 유지.
+ * 5. font-size: 16px: iOS 자동 줌 방지.
+ */
 #hiddenInput {
   position: fixed;
+  left: -100vw;
   top: 50%;
-  left: 50%;
-  width: 1px;
-  height: 1px;
+  transform: translateY(-50%);
+  width: 100vw;
+  height: 2.5em;
   opacity: 0;
-  padding: 0;
-  margin: 0;
+  font-size: 16px;
   border: none;
   outline: none;
-  z-index: 1;           /* 변경: -100 → 1 */
-  font-size: 16px;      /* 추가: iOS 자동 줌 방지 */
   resize: none;
-  /* 제거: pointer-events: none */
+  z-index: 1;
+  padding: 0.2em;
+  color: transparent;
+  background: transparent;
+  caret-color: transparent;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-/* ===== 키보드 열기 FAB (터치 기기 전용) ===== */
+/* ===== 키보드 열기 FAB ===== */
 .keyboard-fab {
   display: none;
   position: fixed;
-  bottom: 24px;
-  right: 20px;
-  width: 56px;
-  height: 56px;
+  bottom: 24px; right: 20px;
+  width: 56px; height: 56px;
   border-radius: 50%;
   background: #2980b9;
   color: #fff;
@@ -488,27 +409,19 @@ html, body {
   box-shadow: 0 4px 16px rgba(0,0,0,0.32);
   cursor: pointer;
   z-index: 998;
-  align-items: center;
-  justify-content: center;
+  align-items: center; justify-content: center;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.15s, transform 0.1s;
 }
-.keyboard-fab:active {
-  background: #3498db;
-  transform: scale(0.93);
-}
-/* 터치 기기(coarse pointer)에서만 표시 */
+.keyboard-fab:active { background: #3498db; transform: scale(0.93); }
 @media (pointer: coarse) {
-  .keyboard-fab {
-    display: flex;
-  }
+  .keyboard-fab { display: flex; }
 }
 
 /* ===== TOAST ===== */
 .toast {
   position: fixed;
-  bottom: 30px;
-  left: 50%;
+  bottom: 30px; left: 50%;
   transform: translateX(-50%);
   background: rgba(0,0,0,0.82);
   color: #fff;
@@ -526,67 +439,37 @@ html, body {
 /* ===== PRINT ===== */
 @media print {
   @page { size: A4 portrait; margin: 0; }
-
   html, body {
-    width: auto !important;
-    height: auto !important;
-    overflow: visible !important;
-    background: #fff !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    width: auto !important; height: auto !important;
+    overflow: visible !important; background: #fff !important;
+    margin: 0 !important; padding: 0 !important;
   }
-
-  .toolbar, .toast, #hiddenInput, .keyboard-fab {
-    display: none !important;
-  }
-
+  .toolbar, .toast, #hiddenInput, .keyboard-fab { display: none !important; }
   .page-container {
-    position: static !important;
-    padding: 0 !important;
-    display: block !important;
-    width: auto !important;
-    height: auto !important;
-    overflow: visible !important;
+    position: static !important; padding: 0 !important;
+    display: block !important; width: auto !important;
+    height: auto !important; overflow: visible !important;
   }
-
   .zoom-wrapper {
-    transform: none !important;
-    display: block !important;
-    width: auto !important;
-    height: auto !important;
-    overflow: visible !important;
-    gap: 0 !important;
+    transform: none !important; display: block !important;
+    width: auto !important; height: auto !important;
+    overflow: visible !important; gap: 0 !important;
   }
-
   .page {
-    width: 794px !important;
-    height: 1123px !important;
-    margin: 0 !important;
-    box-shadow: none !important;
-    page-break-after: always;
-    break-after: page;
+    width: 794px !important; height: 1123px !important;
+    margin: 0 !important; box-shadow: none !important;
+    page-break-after: always; break-after: page;
   }
-
-  .page:last-child {
-    page-break-after: auto;
-    break-after: auto;
-  }
-
+  .page:last-child { page-break-after: auto; break-after: auto; }
   .page-header {
-    display: flex !important;
-    justify-content: flex-end !important;
-    align-items: baseline !important;
-    gap: 6px !important;
-    width: auto !important;
-    text-align: right !important;
+    display: flex !important; justify-content: flex-end !important;
+    align-items: baseline !important; gap: 6px !important;
+    width: auto !important; text-align: right !important;
     padding: 0 4px 10px 0 !important;
   }
-  .page-header .page-no-label,
-  .page-header .page-no {
-    width: auto !important;
-    display: inline !important;
-    flex: none !important;
-    text-align: inherit !important;
+  .page-header .page-no-label, .page-header .page-no {
+    width: auto !important; display: inline !important;
+    flex: none !important; text-align: inherit !important;
   }
 }
 </style>
@@ -602,18 +485,16 @@ html, body {
   <div class="toolbar-menu" id="toolbarMenu">
     <div class="toolbar-group">
       <button onclick="newDocument()">📄 새 문서</button>
-
       <select id="fontSelect" onchange="changeFont(this.value)" title="글꼴">
         <option value="'Noto Serif KR', serif">명조 (Noto Serif)</option>
         <option value="'Nanum Myeongjo', serif">나눔명조</option>
         <option value="'Noto Sans KR', sans-serif">고딕 (Noto Sans)</option>
         <option value="'Nanum Gothic', sans-serif">나눔고딕</option>
       </select>
-
       <div class="color-set" title="원고지 색깔">
-        <button class="color-btn color-red active" data-color="#c0392b" onclick="changeColor(this)" title="빨강"></button>
-        <button class="color-btn color-darkgray" data-color="#555555" onclick="changeColor(this)" title="회색"></button>
-        <button class="color-btn color-black" data-color="#222222" onclick="changeColor(this)" title="검정"></button>
+        <button class="color-btn color-red active"      data-color="#c0392b" onclick="changeColor(this)" title="빨강"></button>
+        <button class="color-btn color-darkgray"        data-color="#555555" onclick="changeColor(this)" title="회색"></button>
+        <button class="color-btn color-black"           data-color="#222222" onclick="changeColor(this)" title="검정"></button>
       </div>
     </div>
 
@@ -623,7 +504,7 @@ html, body {
       <div class="zoom-control">
         <button onclick="setZoom('out')" title="축소">－</button>
         <span class="zoom-label" id="zoomLabel">100%</span>
-        <button onclick="setZoom('in')" title="확대">＋</button>
+        <button onclick="setZoom('in')"  title="확대">＋</button>
       </div>
       <button onclick="setZoom('width')">너비맞춤</button>
       <button onclick="setZoom('height')">높이맞춤</button>
@@ -643,10 +524,12 @@ html, body {
   <div class="zoom-wrapper" id="zoomWrapper"></div>
 </div>
 
-<textarea id="hiddenInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+<textarea id="hiddenInput"
+  autocomplete="off" autocorrect="off"
+  autocapitalize="off" spellcheck="false"></textarea>
 
-<!-- 터치 기기용 키보드 열기 버튼 (iOS/Android) -->
-<button class="keyboard-fab" id="keyboardFab" onclick="openKeyboard()" title="키보드 열기" aria-label="키보드 열기">⌨️</button>
+<button class="keyboard-fab" id="keyboardFab"
+  onclick="openKeyboard()" aria-label="키보드 열기">⌨️</button>
 
 <div class="toast" id="toast"></div>
 
@@ -664,9 +547,26 @@ let state = {
 
 let zoomState = { mode: 'width', scale: 1.0 };
 
+/* ===========================
+ * 한글 IME 핵심: 센티널 문자
+ * ===========================
+ * iOS 한글 IME는 textarea가 비어 있으면 composition을
+ * 시작하지 않음. 제로폭 공백(\u200B)을 항상 position 0에
+ * 두어 IME가 조합 컨텍스트를 유지하게 함.
+ */
+const SENTINEL = '\u200B';
+
+function resetInput() {
+  input.value = SENTINEL;
+  try { input.setSelectionRange(1, 1); } catch(e) {}
+}
+
+/* ===========================
+ * LZ (URL 저장용 간이 압축)
+ * =========================== */
 const LZ = {
-  compress(str){
-    if(!str) return '';
+  compress(str) {
+    if (!str) return '';
     try {
       const bytes = new TextEncoder().encode(str);
       let bin = '';
@@ -674,22 +574,25 @@ const LZ = {
       return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
     } catch(e) { return ''; }
   },
-  decompress(b64){
-    if(!b64) return '';
+  decompress(b64) {
+    if (!b64) return '';
     try {
       b64 = b64.replace(/-/g,'+').replace(/_/g,'/');
-      while(b64.length % 4) b64 += '=';
+      while (b64.length % 4) b64 += '=';
       const bin = atob(b64);
       const bytes = new Uint8Array(bin.length);
-      for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
       return new TextDecoder().decode(bytes);
     } catch(e) { return ''; }
   }
 };
 
 const scroller = document.getElementById('pageContainer');
-const input = document.getElementById('hiddenInput');
+const input    = document.getElementById('hiddenInput');
 
+/* ===========================
+ * URL 저장 / 불러오기
+ * =========================== */
 function saveToURL() {
   const hash = LZ.compress(JSON.stringify({
     t: state.chars.join(''),
@@ -701,11 +604,11 @@ function saveToURL() {
 
 function loadFromURL() {
   const hash = location.hash.slice(1);
-  if(!hash) return;
+  if (!hash) return;
   try {
     const data = JSON.parse(LZ.decompress(hash));
     state.chars = data.t ? data.t.split('') : [];
-    state.font = data.f || state.font;
+    state.font  = data.f || state.font;
     state.color = data.c || state.color;
     applySettings();
   } catch(e) {}
@@ -713,14 +616,16 @@ function loadFromURL() {
 
 function applySettings() {
   document.documentElement.style.setProperty('--font-family', state.font);
-  document.documentElement.style.setProperty('--grid-color', state.color);
+  document.documentElement.style.setProperty('--grid-color',  state.color);
   document.getElementById('fontSelect').value = state.font;
-
   document.querySelectorAll('.color-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.color === state.color);
   });
 }
 
+/* ===========================
+ * 레이아웃 계산
+ * =========================== */
 function buildLayout() {
   const displayChars = [...state.chars];
   let cLen = 0;
@@ -740,22 +645,17 @@ function buildLayout() {
 
   const pages = [];
   let page = { rows: [] };
-  let row = { cells: [], overflow: null, isNewlineEnded: false, newlineLogicalIdx: -1 };
-  let cursorDisplayIdx = state.cursorPos + cLen;
-  
+  let row  = { cells: [], overflow: null, isNewlineEnded: false, newlineLogicalIdx: -1 };
+  const cursorDisplayIdx = state.cursorPos + cLen;
+
   for (let i = 0; i < displayChars.length; i++) {
     const ch = displayChars[i];
 
     if (ch === '\n') {
-      row.isNewlineEnded = true;
+      row.isNewlineEnded    = true;
       row.newlineLogicalIdx = mapToLogical(i);
       page.rows.push(row);
-
-      if (page.rows.length === ROWS) {
-        pages.push(page);
-        page = { rows: [] };
-      }
-
+      if (page.rows.length === ROWS) { pages.push(page); page = { rows: [] }; }
       row = { cells: [], overflow: null, isNewlineEnded: false, newlineLogicalIdx: -1 };
       continue;
     }
@@ -768,48 +668,41 @@ function buildLayout() {
         row.overflow = { char: nextCh, logicalIdx: mapToLogical(i + 1), dispIdx: i + 1 };
         i++;
       }
-
       page.rows.push(row);
-
-      if (page.rows.length === ROWS) {
-        pages.push(page);
-        page = { rows: [] };
-      }
-
+      if (page.rows.length === ROWS) { pages.push(page); page = { rows: [] }; }
       row = { cells: [], overflow: null, isNewlineEnded: false, newlineLogicalIdx: -1 };
     }
   }
-  
+
   if (row.cells.length > 0 || displayChars[displayChars.length - 1] === '\n' || displayChars.length === 0) {
     page.rows.push(row);
   }
-
   if (page.rows.length > 0) pages.push(page);
   if (pages.length === 0) {
     pages.push({ rows: [{ cells: [], overflow: null, isNewlineEnded: false, newlineLogicalIdx: -1 }] });
   }
-  
+
   let lastLogical = 0;
   for (let pIdx = 0; pIdx < pages.length; pIdx++) {
     const p = pages[pIdx];
     while (p.rows.length < ROWS) {
       p.rows.push({ cells: [], overflow: null, isNewlineEnded: false, newlineLogicalIdx: -1 });
     }
-
     for (let rIdx = 0; rIdx < ROWS; rIdx++) {
       const r = p.rows[rIdx];
       for (let cIdx = 0; cIdx < COLS; cIdx++) {
         if (r.cells[cIdx]) {
           lastLogical = r.cells[cIdx].logicalIdx + 1;
         } else {
-          if (r.isNewlineEnded && !r.overflow) {
-            r.cells[cIdx] = { char: '', logicalIdx: r.newlineLogicalIdx, dispIdx: -1, empty: true };
-          } else {
-            r.cells[cIdx] = { char: '', logicalIdx: lastLogical, dispIdx: -1, empty: true };
-          }
+          r.cells[cIdx] = {
+            char: '',
+            logicalIdx: (r.isNewlineEnded && !r.overflow) ? r.newlineLogicalIdx : lastLogical,
+            dispIdx: -1,
+            empty: true
+          };
         }
       }
-      if (r.overflow) lastLogical = r.overflow.logicalIdx + 1;
+      if (r.overflow)      lastLogical = r.overflow.logicalIdx + 1;
       if (r.isNewlineEnded) lastLogical = r.newlineLogicalIdx + 1;
     }
   }
@@ -817,56 +710,52 @@ function buildLayout() {
   return { pages, cursorDisplayIdx };
 }
 
+/* ===========================
+ * 렌더
+ * =========================== */
 function render() {
-  const layout = buildLayout();
+  const layout  = buildLayout();
   const wrapper = document.getElementById('zoomWrapper');
 
-  while (wrapper.children.length < layout.pages.length) {
-    wrapper.appendChild(createPage(wrapper.children.length));
-  }
-  while (wrapper.children.length > layout.pages.length) {
-    wrapper.removeChild(wrapper.lastChild);
-  }
+  while (wrapper.children.length < layout.pages.length) wrapper.appendChild(createPage(wrapper.children.length));
+  while (wrapper.children.length > layout.pages.length) wrapper.removeChild(wrapper.lastChild);
 
   let foundCursor = false;
 
   for (let pIdx = 0; pIdx < layout.pages.length; pIdx++) {
     const pageData = layout.pages[pIdx];
-    const pageEl = wrapper.children[pIdx];
+    const pageEl   = wrapper.children[pIdx];
     pageEl.querySelector('.page-no').textContent = pIdx + 1;
     const gridRows = pageEl.querySelectorAll('.grid-row');
 
     for (let rIdx = 0; rIdx < ROWS; rIdx++) {
       const rowData = pageData.rows[rIdx];
-      const rowEl = gridRows[rIdx];
-      const cells = rowEl.querySelectorAll('.grid-cell');
+      const rowEl   = gridRows[rIdx];
+      const cells   = rowEl.querySelectorAll('.grid-cell');
 
       for (let cIdx = 0; cIdx < COLS; cIdx++) {
         const cellData = rowData.cells[cIdx];
-        const cellEl = cells[cIdx];
+        const cellEl   = cells[cIdx];
         cellEl.querySelector('.cell-char').textContent = cellData.char;
         cellEl.dataset.logicalIdx = cellData.logicalIdx;
 
         let isCursor = false;
         if (!foundCursor) {
           if (cellData.dispIdx === layout.cursorDisplayIdx) {
-            isCursor = true;
-            foundCursor = true;
+            isCursor = true; foundCursor = true;
           } else if (cellData.empty && cellData.logicalIdx >= state.cursorPos) {
-            isCursor = true;
-            foundCursor = true;
+            isCursor = true; foundCursor = true;
           }
         }
 
         const isComposingChar =
-          state.composing &&
-          !cellData.empty &&
+          state.composing && !cellData.empty &&
           cellData.dispIdx >= state.cursorPos &&
-          cellData.dispIdx < state.cursorPos + state.composingText.length;
+          cellData.dispIdx <  state.cursorPos + state.composingText.length;
 
         cellEl.className = 'grid-cell';
         if (isCursor && !state.composing) cellEl.classList.add('cursor-cell');
-        if (isComposingChar) cellEl.classList.add('composing-cell');
+        if (isComposingChar)              cellEl.classList.add('composing-cell');
       }
 
       let overflowEl = rowEl.querySelector('.overflow-cell');
@@ -887,66 +776,120 @@ function render() {
 function createPage(idx) {
   const page = document.createElement('div');
   page.className = 'page';
-
-  let html = `<div class="page-header"><span class="page-no-label">NO.</span><span class="page-no">${idx + 1}</span></div><div class="grid-wrapper">`;
+  let html = `<div class="page-header">
+    <span class="page-no-label">NO.</span>
+    <span class="page-no">${idx + 1}</span>
+  </div><div class="grid-wrapper">`;
   for (let r = 0; r < ROWS; r++) {
     html += `<div class="grid-row">`;
-    for (let c = 0; c < COLS; c++) {
-      html += `<div class="grid-cell"><span class="cell-char"></span></div>`;
-    }
+    for (let c = 0; c < COLS; c++) html += `<div class="grid-cell"><span class="cell-char"></span></div>`;
     html += `</div>`;
   }
   html += `</div>`;
-
   page.innerHTML = html;
   return page;
 }
 
-/*
- * [핵심 수정] focusInput에서 setTimeout 제거
- * iOS Safari는 사용자 제스처 핸들러 내에서 .focus()가 동기적으로
- * 호출되어야만 소프트 키보드를 표시함.
- * setTimeout은 비동기 실행이므로 신뢰된 제스처 컨텍스트를 벗어나
- * iOS에서 키보드가 열리지 않는 원인이 됨.
- */
+/* ===========================
+ * 포커스
+ * [수정] setTimeout 완전 제거.
+ * iOS는 사용자 제스처 핸들러 내 동기 호출만 키보드 허용.
+ * =========================== */
 function focusInput() {
   input.focus({ preventScroll: true });
 }
 
-/*
- * 키보드 열기 FAB 버튼 핸들러
- * onclick에서 직접 호출되므로 iOS에서 신뢰된 제스처로 인식됨
- */
 function openKeyboard() {
+  if (!state.composing) resetInput();
   focusInput();
 }
 
-/*
- * [수정] pointerdown 핸들러
- * - keyboard-fab 클릭 시 핸들러 제외 (FAB 자체가 focusInput 호출)
- * - focusInput()을 동기적으로 호출 (setTimeout 없음)
- */
-document.addEventListener('pointerdown', (e) => {
-  if (e.target.closest('.toolbar')) return;
-  if (e.target.closest('.keyboard-fab')) return;
+/* ===========================
+ * 터치 이벤트 (iOS 키보드 핵심 수정)
+ *
+ * [수정 이유]
+ * - pointerdown + e.preventDefault() 조합은 iOS에서
+ *   "신뢰된 제스처" 컨텍스트를 파괴해 키보드가 올라왔다
+ *   내려가는 현상(움찔거림)을 유발함.
+ *
+ * [해결책]
+ * 1. touchstart { passive:true } : preventDefault 불가 →
+ *    iOS가 완전한 신뢰 제스처로 인식 → 키보드 안정적 표시.
+ * 2. touchend : 탭 감지 후 커서 이동, preventDefault로
+ *    합성 click 이벤트 억제.
+ * 3. pointerdown (mouse 전용) : 데스크톱 마우스 클릭 처리.
+ * =========================== */
+let touchStartX = 0, touchStartY = 0;
 
+document.addEventListener('touchstart', (e) => {
+  if (e.target.closest('.toolbar') || e.target.closest('.keyboard-fab')) return;
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+  focusInput(); // passive 이벤트 내 동기 호출 → iOS 키보드 표시
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+  if (e.target.closest('.toolbar') || e.target.closest('.keyboard-fab')) return;
+  const t    = e.changedTouches[0];
+  const dist = Math.hypot(t.clientX - touchStartX, t.clientY - touchStartY);
+
+  if (dist < 12) { // 탭으로 판정
+    e.preventDefault(); // 합성 click 억제
+    // touchend 기준 위치의 실제 요소 탐색
+    const cell = document.elementFromPoint(t.clientX, t.clientY)?.closest('.grid-cell');
+    if (cell) {
+      const idx = parseInt(cell.dataset.logicalIdx, 10);
+      if (!isNaN(idx)) {
+        state.cursorPos = Math.min(idx, state.chars.length);
+        render();
+      }
+    }
+    focusInput(); // preventDefault 후 재포커스로 키보드 유지 보장
+  }
+}, { passive: false });
+
+/* 마우스 전용 (데스크톱) */
+document.addEventListener('pointerdown', (e) => {
+  if (e.pointerType !== 'mouse') return; // 터치/펜 이벤트 무시
+  if (e.target.closest('.toolbar') || e.target.closest('.keyboard-fab')) return;
   const cell = e.target.closest('.grid-cell');
   if (cell) {
-    e.preventDefault();
+    e.preventDefault(); // 텍스트 선택 방지
     const idx = parseInt(cell.dataset.logicalIdx, 10);
     if (!isNaN(idx)) {
       state.cursorPos = Math.min(idx, state.chars.length);
       render();
     }
-    focusInput(); // 동기 호출로 iOS 키보드 활성화
-  } else if (e.target.closest('.page-container')) {
-    e.preventDefault();
-    focusInput();
+  } else if (!e.target.closest('.page-container')) {
+    return;
+  }
+  focusInput();
+});
+
+/* 클릭: 메뉴 닫기 전용 (커서 이동은 위 핸들러에서 처리) */
+document.addEventListener('click', (e) => {
+  const toolbar = document.getElementById('toolbar');
+  const menu    = document.getElementById('toolbarMenu');
+  if (toolbar.classList.contains('compact') && menu.classList.contains('open')) {
+    if (!e.target.closest('#toolbarMenu') && !e.target.closest('#menuToggle')) {
+      menu.classList.remove('open');
+    }
   }
 });
 
+/* ===========================
+ * IME 조합 이벤트
+ *
+ * [한글 IME 수정 요점]
+ * ① textarea를 크게 만들어 iOS IME가 composition 발화.
+ * ② 센티널(\u200B)로 textarea를 항상 비지 않게 유지.
+ * ③ e.isComposing 으로 이중 삽입 방지(compositionend 직후
+ *    input 이벤트 발화 시 중복 처리 방지).
+ * ④ compositionend에서 e.data가 없을 경우 input.value
+ *    폴백(resetInput 호출 전에 읽어야 함).
+ * =========================== */
 input.addEventListener('compositionstart', () => {
-  state.composing = true;
+  state.composing     = true;
   state.composingText = '';
   render();
 });
@@ -958,27 +901,36 @@ input.addEventListener('compositionupdate', (e) => {
 
 input.addEventListener('compositionend', (e) => {
   state.composing = false;
-  if (e.data) {
-    for (const ch of e.data) {
+  // resetInput() 호출 전에 value 읽기
+  const fallback = input.value.replace(SENTINEL, '');
+  const text     = (e.data && e.data.length > 0) ? e.data : fallback;
+  if (text) {
+    for (const ch of text) {
       state.chars.splice(state.cursorPos, 0, ch);
       state.cursorPos++;
     }
   }
   state.composingText = '';
-  input.value = '';
+  resetInput(); // 센티널 복원
   render();
   saveToURL();
   scrollToCursor();
 });
 
-input.addEventListener('input', () => {
-  if (state.composing) return;
-  if (input.value) {
-    for (const ch of input.value) {
+input.addEventListener('input', (e) => {
+  /*
+   * state.composing : compositionstart가 먼저 발화한 경우
+   * e.isComposing   : compositionstart보다 input이 먼저
+   *                   발화하는 일부 iOS 버전 대응
+   */
+  if (state.composing || e.isComposing) return;
+  const text = input.value.replace(SENTINEL, '');
+  if (text) {
+    for (const ch of text) {
       state.chars.splice(state.cursorPos, 0, ch);
       state.cursorPos++;
     }
-    input.value = '';
+    resetInput();
     render();
     saveToURL();
     scrollToCursor();
@@ -992,33 +944,22 @@ input.addEventListener('keydown', (e) => {
     e.preventDefault();
     state.chars.splice(state.cursorPos - 1, 1);
     state.cursorPos--;
-    render();
-    saveToURL();
-    scrollToCursor();
-  }
-  else if (e.key === 'Delete' && state.cursorPos < state.chars.length) {
+    render(); saveToURL(); scrollToCursor();
+  } else if (e.key === 'Delete' && state.cursorPos < state.chars.length) {
     e.preventDefault();
     state.chars.splice(state.cursorPos, 1);
-    render();
-    saveToURL();
-  }
-  else if (e.key === 'Enter') {
+    render(); saveToURL();
+  } else if (e.key === 'Enter') {
     e.preventDefault();
     state.chars.splice(state.cursorPos, 0, '\n');
     state.cursorPos++;
-    render();
-    saveToURL();
-    scrollToCursor();
-  }
-  else if (e.key === 'ArrowLeft' && state.cursorPos > 0) {
+    render(); saveToURL(); scrollToCursor();
+  } else if (e.key === 'ArrowLeft' && state.cursorPos > 0) {
     state.cursorPos--;
-    render();
-    scrollToCursor();
-  }
-  else if (e.key === 'ArrowRight' && state.cursorPos < state.chars.length) {
+    render(); scrollToCursor();
+  } else if (e.key === 'ArrowRight' && state.cursorPos < state.chars.length) {
     state.cursorPos++;
-    render();
-    scrollToCursor();
+    render(); scrollToCursor();
   }
 });
 
@@ -1026,13 +967,10 @@ function scrollToCursor() {
   requestAnimationFrame(() => {
     const el = document.querySelector('.cursor-cell, .composing-cell');
     if (!el) return;
-
-    const containerRect = scroller.getBoundingClientRect();
-    const rect = el.getBoundingClientRect();
-
-    const topLimit = containerRect.top + 90;
-    const bottomLimit = containerRect.bottom - 70;
-
+    const containerRect  = scroller.getBoundingClientRect();
+    const rect           = el.getBoundingClientRect();
+    const topLimit       = containerRect.top + 90;
+    const bottomLimit    = containerRect.bottom - 70;
     if (rect.top < topLimit) {
       scroller.scrollBy({ top: rect.top - topLimit, behavior: 'smooth' });
     } else if (rect.bottom > bottomLimit) {
@@ -1041,14 +979,27 @@ function scrollToCursor() {
   });
 }
 
-/* ===== ZOOM ===== */
-function initMobileZoom() {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
+/* ===========================
+ * ZOOM
+ *
+ * [수정] visualViewport 사용.
+ * DOMContentLoaded 시점에 window.innerWidth는 iOS에서
+ * 뷰포트 메타 처리 전 980px를 반환하는 경우가 있음.
+ * visualViewport.width는 항상 실제 CSS 픽셀 크기를 반환.
+ * =========================== */
+function getVP() {
+  const vp = window.visualViewport;
+  return {
+    w: Math.round(vp ? vp.width  : window.innerWidth),
+    h: Math.round(vp ? vp.height : window.innerHeight)
+  };
+}
 
-  if (h > w) {
+function initMobileZoom() {
+  const { w, h } = getVP();
+  if (w <= h) {        // 세로 모드: 너비 기준
     setZoom('width');
-  } else {
+  } else {             // 가로 모드: 60% 너비 기준
     zoomState = {
       mode: 'custom',
       scale: Math.min(2.0, Math.max(0.25, (w * 0.6) / 794))
@@ -1058,67 +1009,78 @@ function initMobileZoom() {
 }
 
 function setZoom(action) {
-  const PAGE_W = 794 + 80;
-  const PAGE_H = 1123 + 120;
+  const { w, h } = getVP();
+  const PAGE_W = 794 + 80;   // 874
+  const PAGE_H = 1123 + 120; // 1243
 
   if (action === 'in') {
-    zoomState.mode = 'custom';
+    zoomState.mode  = 'custom';
     zoomState.scale = Math.min(3.0, zoomState.scale + 0.1);
-  }
-  else if (action === 'out') {
-    zoomState.mode = 'custom';
+  } else if (action === 'out') {
+    zoomState.mode  = 'custom';
     zoomState.scale = Math.max(0.25, zoomState.scale - 0.1);
+  } else if (action === 'width') {
+    zoomState.mode  = 'width';
+    zoomState.scale = w / PAGE_W;
+  } else if (action === 'height') {
+    zoomState.mode  = 'height';
+    zoomState.scale = (h - 80) / PAGE_H;
   }
-  else if (action === 'width') {
-    zoomState.mode = 'width';
-    zoomState.scale = window.innerWidth / PAGE_W;
-  }
-  else if (action === 'height') {
-    zoomState.mode = 'height';
-    zoomState.scale = ((window.visualViewport ? window.visualViewport.height : window.innerHeight) - 80) / PAGE_H;
-  }
-
   applyZoom();
 }
 
 function applyZoom() {
-  document.getElementById('zoomWrapper').style.transform = `scale(${zoomState.scale})`;
-  document.getElementById('zoomLabel').textContent = Math.round(zoomState.scale * 100) + '%';
+  document.getElementById('zoomWrapper').style.transform =
+    `scale(${zoomState.scale})`;
+  document.getElementById('zoomLabel').textContent =
+    Math.round(zoomState.scale * 100) + '%';
 }
 
-/* ===== TOOLBAR MODE ===== */
+/* resize: window + visualViewport 둘 다 감지 */
+window.addEventListener('resize', () => {
+  if (zoomState.mode === 'width' || zoomState.mode === 'height') setZoom(zoomState.mode);
+  updateToolbarMode();
+});
+
+if (window.visualViewport) {
+  /* iOS에서 키보드 열림/닫힘 시 visualViewport.resize 발화 */
+  window.visualViewport.addEventListener('resize', () => {
+    if (zoomState.mode === 'width' || zoomState.mode === 'height') setZoom(zoomState.mode);
+  });
+}
+
+/* ===========================
+ * 툴바
+ * =========================== */
 function getMenuNaturalWidth() {
   const toolbarMenu = document.getElementById('toolbarMenu');
-  const items = Array.from(toolbarMenu.children);
+  const items       = Array.from(toolbarMenu.children);
   let total = 0;
-
-  items.forEach((el) => {
+  items.forEach(el => {
     const style = window.getComputedStyle(el);
-    total += el.offsetWidth;
-    total += parseFloat(style.marginLeft || 0);
-    total += parseFloat(style.marginRight || 0);
+    total += el.offsetWidth
+           + parseFloat(style.marginLeft  || 0)
+           + parseFloat(style.marginRight || 0);
   });
-
-  const gap = parseFloat(window.getComputedStyle(toolbarMenu).columnGap || window.getComputedStyle(toolbarMenu).gap || 0);
+  const gap = parseFloat(
+    window.getComputedStyle(toolbarMenu).columnGap ||
+    window.getComputedStyle(toolbarMenu).gap || 0
+  );
   if (items.length > 1) total += gap * (items.length - 1);
-
   return total;
 }
 
 function updateToolbarMode() {
-  const toolbar = document.getElementById('toolbar');
+  const toolbar     = document.getElementById('toolbar');
   const toolbarMenu = document.getElementById('toolbarMenu');
-  const left = toolbar.querySelector('.toolbar-left');
+  const left        = toolbar.querySelector('.toolbar-left');
 
   toolbar.classList.remove('compact');
   toolbarMenu.classList.remove('open');
 
   const availableWidth = toolbar.clientWidth - 24;
-  const neededWidth = left.offsetWidth + getMenuNaturalWidth() + 24;
-
-  if (neededWidth > availableWidth) {
-    toolbar.classList.add('compact');
-  }
+  const neededWidth    = left.offsetWidth + getMenuNaturalWidth() + 24;
+  if (neededWidth > availableWidth) toolbar.classList.add('compact');
 }
 
 function toggleMenu() {
@@ -1134,54 +1096,39 @@ function closeMenuOnCompact() {
   }
 }
 
-/* ===== ACTIONS ===== */
+/* ===========================
+ * 액션
+ * =========================== */
 function newDocument() {
   if (confirm('모든 내용이 지워집니다. 새로 시작할까요?')) {
-    state.chars = [];
-    state.cursorPos = 0;
-    render();
-    saveToURL();
-    focusInput();
-    closeMenuOnCompact();
+    state.chars = []; state.cursorPos = 0;
+    render(); saveToURL(); focusInput(); closeMenuOnCompact();
   }
 }
-
 function changeFont(v) {
   state.font = v;
   document.documentElement.style.setProperty('--font-family', v);
-  render();
-  saveToURL();
-  focusInput();
+  render(); saveToURL(); focusInput();
 }
-
 function changeColor(btn) {
   document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   state.color = btn.dataset.color;
   document.documentElement.style.setProperty('--grid-color', state.color);
-  saveToURL();
-  focusInput();
+  saveToURL(); focusInput();
 }
-
 function doPrint() {
   closeMenuOnCompact();
   setTimeout(() => window.print(), 100);
 }
-
 function copyURL() {
-  navigator.clipboard.writeText(location.href).then(() => {
-    showToast('현재 문서 주소가 복사되었습니다.');
-  });
+  navigator.clipboard.writeText(location.href).then(() => showToast('현재 문서 주소가 복사되었습니다.'));
   closeMenuOnCompact();
 }
-
 function copyText() {
-  navigator.clipboard.writeText(state.chars.join('')).then(() => {
-    showToast('텍스트가 복사되었습니다.');
-  });
+  navigator.clipboard.writeText(state.chars.join('')).then(() => showToast('텍스트가 복사되었습니다.'));
   closeMenuOnCompact();
 }
-
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -1189,31 +1136,25 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-document.addEventListener('click', (e) => {
-  const toolbar = document.getElementById('toolbar');
-  const menu = document.getElementById('toolbarMenu');
-
-  if (toolbar.classList.contains('compact') && menu.classList.contains('open')) {
-    if (!e.target.closest('#toolbarMenu') && !e.target.closest('#menuToggle')) {
-      menu.classList.remove('open');
-    }
-  }
-});
-
-window.addEventListener('resize', () => {
-  if (zoomState.mode === 'width' || zoomState.mode === 'height') {
-    setZoom(zoomState.mode);
-  }
-  updateToolbarMode();
-});
-
+/* ===========================
+ * 초기화
+ * [수정] double rAF:
+ * DOMContentLoaded 직후 iOS visualViewport가 아직 뷰포트
+ * 메타를 반영하지 않을 수 있음. 두 번의 rAF 후 실행하면
+ * 렌더링 파이프라인이 완료되어 정확한 크기를 얻음.
+ * =========================== */
 document.addEventListener('DOMContentLoaded', () => {
   loadFromURL();
   applySettings();
   render();
-  initMobileZoom();
-  focusInput();
-  updateToolbarMode();
+  resetInput(); // 센티널 초기화
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      initMobileZoom();   // 정확한 viewport 크기로 zoom 초기화
+      updateToolbarMode();
+    });
+  });
 });
 </script>
 </body>
