@@ -228,7 +228,6 @@ html, body {
   overflow-y: auto;
 }
 
-
 .toolbar.compact .toolbar-menu.open {
   display: flex;
 }
@@ -299,7 +298,6 @@ html, body {
   display: none !important;
 }
 
-/* 모바일에서는 전체폭 드롭다운 허용 */
 @media (max-width: 640px) {
   .toolbar.compact .toolbar-menu {
     left: 0;
@@ -450,7 +448,13 @@ html, body {
   50% { opacity:0; }
 }
 
-/* ===== HIDDEN INPUT ===== */
+/* ===== HIDDEN INPUT (iOS 수정) ===== */
+/*
+  [변경 이유]
+  1. z-index: -100 → 1  : iOS는 음수 z-index 요소에 포커스 불가
+  2. pointer-events: none 제거 : iOS가 포커스 불가 요소로 분류
+  3. font-size: 16px 추가 : 16px 미만이면 iOS가 자동 줌인하여 레이아웃 파괴
+*/
 #hiddenInput {
   position: fixed;
   top: 50%;
@@ -462,8 +466,42 @@ html, body {
   margin: 0;
   border: none;
   outline: none;
-  z-index: -100;
-  pointer-events: none;
+  z-index: 1;           /* 변경: -100 → 1 */
+  font-size: 16px;      /* 추가: iOS 자동 줌 방지 */
+  resize: none;
+  /* 제거: pointer-events: none */
+}
+
+/* ===== 키보드 열기 FAB (터치 기기 전용) ===== */
+.keyboard-fab {
+  display: none;
+  position: fixed;
+  bottom: 24px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #2980b9;
+  color: #fff;
+  font-size: 22px;
+  border: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.32);
+  cursor: pointer;
+  z-index: 998;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, transform 0.1s;
+}
+.keyboard-fab:active {
+  background: #3498db;
+  transform: scale(0.93);
+}
+/* 터치 기기(coarse pointer)에서만 표시 */
+@media (pointer: coarse) {
+  .keyboard-fab {
+    display: flex;
+  }
 }
 
 /* ===== TOAST ===== */
@@ -498,7 +536,7 @@ html, body {
     padding: 0 !important;
   }
 
-  .toolbar, .toast, #hiddenInput {
+  .toolbar, .toast, #hiddenInput, .keyboard-fab {
     display: none !important;
   }
 
@@ -606,6 +644,10 @@ html, body {
 </div>
 
 <textarea id="hiddenInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+
+<!-- 터치 기기용 키보드 열기 버튼 (iOS/Android) -->
+<button class="keyboard-fab" id="keyboardFab" onclick="openKeyboard()" title="키보드 열기" aria-label="키보드 열기">⌨️</button>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -722,7 +764,7 @@ function buildLayout() {
 
     if (row.cells.length === COLS) {
       const nextCh = displayChars[i + 1];
-      if (nextCh && nextCh !== '\n' && /^[.,?!'"”’ ]$/.test(nextCh)) {
+      if (nextCh && nextCh !== '\n' && /^[.,?!'""' ]$/.test(nextCh)) {
         row.overflow = { char: nextCh, logicalIdx: mapToLogical(i + 1), dispIdx: i + 1 };
         i++;
       }
@@ -860,14 +902,33 @@ function createPage(idx) {
   return page;
 }
 
+/*
+ * [핵심 수정] focusInput에서 setTimeout 제거
+ * iOS Safari는 사용자 제스처 핸들러 내에서 .focus()가 동기적으로
+ * 호출되어야만 소프트 키보드를 표시함.
+ * setTimeout은 비동기 실행이므로 신뢰된 제스처 컨텍스트를 벗어나
+ * iOS에서 키보드가 열리지 않는 원인이 됨.
+ */
 function focusInput() {
-  setTimeout(() => {
-    input.focus({ preventScroll: true });
-  }, 50);
+  input.focus({ preventScroll: true });
 }
 
+/*
+ * 키보드 열기 FAB 버튼 핸들러
+ * onclick에서 직접 호출되므로 iOS에서 신뢰된 제스처로 인식됨
+ */
+function openKeyboard() {
+  focusInput();
+}
+
+/*
+ * [수정] pointerdown 핸들러
+ * - keyboard-fab 클릭 시 핸들러 제외 (FAB 자체가 focusInput 호출)
+ * - focusInput()을 동기적으로 호출 (setTimeout 없음)
+ */
 document.addEventListener('pointerdown', (e) => {
   if (e.target.closest('.toolbar')) return;
+  if (e.target.closest('.keyboard-fab')) return;
 
   const cell = e.target.closest('.grid-cell');
   if (cell) {
@@ -876,8 +937,8 @@ document.addEventListener('pointerdown', (e) => {
     if (!isNaN(idx)) {
       state.cursorPos = Math.min(idx, state.chars.length);
       render();
-      focusInput();
     }
+    focusInput(); // 동기 호출로 iOS 키보드 활성화
   } else if (e.target.closest('.page-container')) {
     e.preventDefault();
     focusInput();
@@ -973,15 +1034,9 @@ function scrollToCursor() {
     const bottomLimit = containerRect.bottom - 70;
 
     if (rect.top < topLimit) {
-      scroller.scrollBy({
-        top: rect.top - topLimit,
-        behavior: 'smooth'
-      });
+      scroller.scrollBy({ top: rect.top - topLimit, behavior: 'smooth' });
     } else if (rect.bottom > bottomLimit) {
-      scroller.scrollBy({
-        top: rect.bottom - bottomLimit,
-        behavior: 'smooth'
-      });
+      scroller.scrollBy({ top: rect.bottom - bottomLimit, behavior: 'smooth' });
     }
   });
 }
