@@ -399,24 +399,6 @@ html, body {
 
 /* ===== PRINT ===== */
 @media print {
-  /*
-   * [수정] iOS Safari 빈 페이지 원인 및 해결
-   *
-   * 원인 1: .page { height: 1123px } — px 단위는 iOS Safari
-   *   내부 인쇄 해상도 계산(72dpi/96dpi 혼용)과 어긋나
-   *   실제 용지보다 height가 조금 크게 처리되어
-   *   다음 페이지 시작 전에 빈 공간이 생김.
-   *   → height: 297mm 로 mm 단위 사용 (브라우저가 직접 변환)
-   *
-   * 원인 2: .zoom-wrapper { gap: 40px } — 인쇄 시에도 gap이
-   *   남아 페이지 사이 여백이 추가 페이지를 만듦.
-   *   → display: block 으로 변경하면 gap 자체가 사라짐.
-   *
-   * 원인 3: .page-container padding(28px/60px) — 인쇄 영역
-   *   계산에 포함되어 첫 페이지 오프셋 발생.
-   *   → padding: 0 으로 초기화.
-   */
-
   @page {
     size: A4 portrait;
     margin: 0;
@@ -446,7 +428,7 @@ html, body {
 
   .zoom-wrapper {
     transform: none !important;
-    display: block !important;   /* flex → block: gap 제거 효과 */
+    display: block !important;
     width: auto !important;
     height: auto !important;
     overflow: visible !important;
@@ -454,16 +436,14 @@ html, body {
   }
 
   .page {
-    /* mm 단위로 정확한 A4 크기 지정 */
     width: 210mm !important;
-    height: 297mm !important;    /* 변경: 1123px → 297mm */
+    height: 297mm !important;
     margin: 0 !important;
     padding: 60px 47px !important;
     box-shadow: none !important;
     overflow: hidden !important;
     page-break-after: always;
     break-after: page;
-    /* 인쇄 시 배경색/이미지 유지 */
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -542,8 +522,6 @@ html, body {
   <div class="zoom-wrapper" id="zoomWrapper"></div>
 </div>
 
-<!-- keyboard-fab 제거 -->
-
 <textarea id="hiddenInput"
   autocomplete="off" autocorrect="off"
   autocapitalize="off" spellcheck="false"></textarea>
@@ -567,6 +545,22 @@ let zoomState = { mode: 'width', scale: 1.0 };
 /* 센티널: iOS 한글 IME가 composition을 시작하려면
    textarea가 비어 있지 않아야 함 */
 const SENTINEL = '\u200B';
+
+/*
+ * ── iPad 한글 IME 보정용 변수 ─────────────────────────────────────
+ * iPad(iOS Safari)에서는 한글 입력 중 매 키 입력마다
+ *   compositionend → compositionstart
+ * 가 연속으로 발생하여 중간 조합 단계('ㅇ', '아', '안')가
+ * 각각 확정 문자로 삽입되는 버그가 있다.
+ *
+ * 해결 방법 (setTimeout 지연 확정):
+ *   compositionend  → 즉시 삽입하지 않고 setTimeout(0)으로 지연
+ *   compositionstart → 같은 태스크 내에 뒤따르면 타이머 취소 (중간 단계)
+ *   타이머 실행      → 최종 조합 문자를 chars에 확정 삽입
+ * ──────────────────────────────────────────────────────────────── */
+let compositionTimer             = null;  // 지연 확정 타이머 ID
+let pendingCompositionText       = '';    // 타이머에서 확정할 조합 문자
+let pendingCharsAfterComposition = '';    // 조합 직후 버퍼된 추가 문자(예: 공백)
 
 function resetInput() {
   input.value = SENTINEL;
@@ -670,7 +664,7 @@ function buildLayout() {
 
     if (row.cells.length === COLS) {
       const nextCh = displayChars[i + 1];
-      if (nextCh && nextCh !== '\n' && /^[.,?!'""' ]$/.test(nextCh)) {
+      if (nextCh && nextCh !== '\n' && /^[.,?!'""\u2018\u2019\u201C\u201D ]$/.test(nextCh)) {
         row.overflow = { char: nextCh, logicalIdx: mapToLogical(i + 1), dispIdx: i + 1 };
         i++;
       }
@@ -857,47 +851,109 @@ document.addEventListener('click', (e) => {
 });
 
 /* ===== IME 이벤트 ===== */
+
 input.addEventListener('compositionstart', () => {
+  if (compositionTimer !== null) {
+    /*
+     * [iPad 한글 IME 보정]
+     * 동일한 키 입력 처리 태스크 내에서 compositionend 직후 compositionstart 가
+     * 연속 발생하는 경우 → 중간 단계이므로 타이머를 취소하고 삽입하지 않는다.
+     *
+     * composingText 는 건드리지 않는다.
+     * 이전 조합 글자('ㅇ' 등)를 그대로 유지하다가
+     * compositionupdate 에서 새 값('아' 등)으로 교체되므로
+     * 화면 깜빡임이 최소화된다.
+     */
+    clearTimeout(compositionTimer);
+    compositionTimer             = null;
+    pendingCompositionText       = '';
+    pendingCharsAfterComposition = '';
+    /* state.composing 은 이미 true — render 는 compositionupdate 에서 호출 */
+    return;
+  }
   state.composing     = true;
   state.composingText = '';
   render();
 });
 
 input.addEventListener('compositionupdate', (e) => {
+  state.composing     = true;           // 타이머 취소 후 재진입 시에도 보장
   state.composingText = e.data || '';
   render();
 });
 
 input.addEventListener('compositionend', (e) => {
-  state.composing = false;
-  const fallback  = input.value.replace(SENTINEL, '');
-  const text      = (e.data && e.data.length > 0) ? e.data : fallback;
-  if (text) {
-    for (const ch of text) {
-      state.chars.splice(state.cursorPos, 0, ch);
-      state.cursorPos++;
-    }
-  }
-  state.composingText = '';
-  resetInput();
-  render();
-  saveToURL();
-  scrollToCursor();
-});
+  /*
+   * [iPad 한글 IME 보정]
+   * 즉시 삽입하지 않고 setTimeout(0) 으로 지연한다.
+   *  - 같은 태스크 내에서 compositionstart 가 뒤따르면 → 타이머 취소 (중간 단계)
+   *  - compositionstart 가 없으면 → 타이머 실행 → 최종 확정 삽입
+   *
+   * composingText 는 여기서 지우지 않는다.
+   * 타이머가 실행될 때까지 현재 조합 글자를 화면에 그대로 표시한다.
+   */
+  const fallback = input.value.replace(SENTINEL, '');
+  pendingCompositionText       = (e.data && e.data.length > 0) ? e.data : fallback;
+  pendingCharsAfterComposition = '';
 
-input.addEventListener('input', (e) => {
-  if (state.composing || e.isComposing) return;
-  const text = input.value.replace(SENTINEL, '');
-  if (text) {
-    for (const ch of text) {
-      state.chars.splice(state.cursorPos, 0, ch);
-      state.cursorPos++;
+  compositionTimer = setTimeout(() => {
+    compositionTimer    = null;
+    state.composing     = false;
+    state.composingText = '';
+
+    const text = pendingCompositionText;
+    pendingCompositionText = '';
+    if (text) {
+      for (const ch of text) {
+        state.chars.splice(state.cursorPos, 0, ch);
+        state.cursorPos++;
+      }
     }
+
+    /* 조합 직후 버퍼된 문자(예: 공백) 처리 */
+    if (pendingCharsAfterComposition) {
+      for (const ch of pendingCharsAfterComposition) {
+        state.chars.splice(state.cursorPos, 0, ch);
+        state.cursorPos++;
+      }
+      pendingCharsAfterComposition = '';
+    }
+
     resetInput();
     render();
     saveToURL();
     scrollToCursor();
+  }, 0);
+});
+
+input.addEventListener('input', (e) => {
+  if (e.isComposing) return;
+
+  /*
+   * compositionend 직후 타이머 대기 중:
+   *  - composition 결과 자체(e.data === pendingCompositionText)는 건너뜀
+   *    (타이머에서 이미 처리 예정)
+   *  - 그 외 새 문자(예: 조합 종료 후 입력된 공백)는 버퍼에 저장
+   */
+  if (compositionTimer !== null) {
+    if (e.data && e.data !== pendingCompositionText) {
+      pendingCharsAfterComposition += e.data;
+    }
+    return;
   }
+
+  if (state.composing) return;
+
+  const text = input.value.replace(SENTINEL, '');
+  if (!text) return;
+  for (const ch of text) {
+    state.chars.splice(state.cursorPos, 0, ch);
+    state.cursorPos++;
+  }
+  resetInput();
+  render();
+  saveToURL();
+  scrollToCursor();
 });
 
 input.addEventListener('keydown', (e) => {
@@ -1050,7 +1106,6 @@ function changeFont(v) {
   document.documentElement.style.setProperty('--font-family', v);
   render();
   saveToURL();
-  // [수정] focusInput() 제거: 글꼴 변경 시 키보드 올라오는 문제 방지
 }
 
 function changeColor(btn) {
@@ -1059,7 +1114,6 @@ function changeColor(btn) {
   state.color = btn.dataset.color;
   document.documentElement.style.setProperty('--grid-color', state.color);
   saveToURL();
-  // [수정] focusInput() 제거: 색깔 변경 시 키보드 올라오는 문제 방지
 }
 
 function doPrint() {
