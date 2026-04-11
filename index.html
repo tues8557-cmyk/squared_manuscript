@@ -347,7 +347,15 @@ html, body {
   background: #2962ff;
   animation: blink 1s step-end infinite;
 }
-.grid-cell.composing-cell { background: rgba(255,193,7,0.2); }
+.grid-cell.selected-cell {
+  background: rgba(66,133,244,0.12);
+}
+.grid-cell.selection-focus-cell {
+  box-shadow: inset 0 0 0 2px rgba(41,98,255,0.25);
+}
+.grid-cell.composing-cell {
+  background: rgba(255,193,7,0.2);
+}
 .grid-cell.composing-cell .cell-char {
   border-bottom: 2px solid #f57c00;
   padding-bottom: 1px;
@@ -534,37 +542,204 @@ const COLS = 20, ROWS = 20;
 let state = {
   chars: [],
   cursorPos: 0,
+  selectionStart: 0,
+  selectionEnd: 0,
   font: "'Noto Serif KR', serif",
   color: '#c0392b',
-  composing: false,
-  composingText: ''
+  composing: false
 };
 
 let zoomState = { mode: 'width', scale: 1.0 };
 
-/* 센티널: iOS 한글 IME가 composition을 시작하려면
-   textarea가 비어 있지 않아야 함 */
 const SENTINEL = '\u200B';
+const SENTINEL_LEN = SENTINEL.length;
 
-/*
- * ── iPad 한글 IME 보정용 변수 ─────────────────────────────────────
- * iPad(iOS Safari)에서는 한글 입력 중 매 키 입력마다
- *   compositionend → compositionstart
- * 가 연속으로 발생하여 중간 조합 단계('ㅇ', '아', '안')가
- * 각각 확정 문자로 삽입되는 버그가 있다.
- *
- * 해결 방법 (setTimeout 지연 확정):
- *   compositionend  → 즉시 삽입하지 않고 setTimeout(0)으로 지연
- *   compositionstart → 같은 태스크 내에 뒤따르면 타이머 취소 (중간 단계)
- *   타이머 실행      → 최종 조합 문자를 chars에 확정 삽입
- * ──────────────────────────────────────────────────────────────── */
-let compositionTimer             = null;  // 지연 확정 타이머 ID
-let pendingCompositionText       = '';    // 타이머에서 확정할 조합 문자
-let pendingCharsAfterComposition = '';    // 조합 직후 버퍼된 추가 문자(예: 공백)
+const scroller = document.getElementById('pageContainer');
+const input    = document.getElementById('hiddenInput');
+const supportsBeforeInput = 'onbeforeinput' in input;
 
-function resetInput() {
-  input.value = SENTINEL;
-  try { input.setSelectionRange(1, 1); } catch(e) {}
+const MANUAL_BEFOREINPUT_TYPES = new Set([
+  'deleteContentBackward',
+  'deleteContentForward',
+  'deleteWordBackward',
+  'deleteWordForward',
+  'insertParagraph',
+  'insertLineBreak'
+]);
+
+/* ===== 유틸 ===== */
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
+}
+
+function normalizeText(text) {
+  return String(text ?? '')
+    .replace(/\r\n?/g, '\n')
+    .replace(/\u200B/g, '');
+}
+
+function hasSelection() {
+  return state.selectionStart !== state.selectionEnd;
+}
+
+function getSelectedText() {
+  const start = Math.min(state.selectionStart, state.selectionEnd);
+  const end   = Math.max(state.selectionStart, state.selectionEnd);
+  return state.chars.slice(start, end).join('');
+}
+
+function setLogicalSelection(start, end = start, opts = {}) {
+  const max = state.chars.length;
+  const s = clamp(Math.min(start, end), 0, max);
+  const e = clamp(Math.max(start, end), 0, max);
+
+  state.selectionStart = s;
+  state.selectionEnd   = e;
+  state.cursorPos      = e;
+
+  if (opts.syncInput)  syncInputFromState();
+  if (opts.renderView) render();
+  if (opts.scroll)     scrollToCursor();
+  if (opts.focus)      focusInput();
+}
+
+function replaceRangeInState(start, end, text) {
+  const max = state.chars.length;
+  const s = clamp(Math.min(start, end), 0, max);
+  const e = clamp(Math.max(start, end), 0, max);
+  const safe = normalizeText(text);
+
+  state.chars.splice(s, e - s, ...safe.split(''));
+  const next = s + safe.length;
+  setLogicalSelection(next, next);
+  return true;
+}
+
+function deleteRangeInState(start, end) {
+  const s = Math.min(start, end);
+  const e = Math.max(start, end);
+  if (s === e) return false;
+  state.chars.splice(s, e - s);
+  setLogicalSelection(s, s);
+  return true;
+}
+
+function deleteBackwardInState() {
+  if (hasSelection()) {
+    return deleteRangeInState(state.selectionStart, state.selectionEnd);
+  }
+  if (state.cursorPos <= 0) return false;
+  state.chars.splice(state.cursorPos - 1, 1);
+  setLogicalSelection(state.cursorPos - 1, state.cursorPos - 1);
+  return true;
+}
+
+function deleteForwardInState() {
+  if (hasSelection()) {
+    return deleteRangeInState(state.selectionStart, state.selectionEnd);
+  }
+  if (state.cursorPos >= state.chars.length) return false;
+  state.chars.splice(state.cursorPos, 1);
+  setLogicalSelection(state.cursorPos, state.cursorPos);
+  return true;
+}
+
+function deleteWordBackwardInState() {
+  if (hasSelection()) {
+    return deleteRangeInState(state.selectionStart, state.selectionEnd);
+  }
+  const text = state.chars.join('');
+  let i = state.cursorPos;
+  if (i <= 0) return false;
+
+  while (i > 0 && /\s/.test(text[i - 1])) i--;
+  while (i > 0 && !/\s/.test(text[i - 1])) i--;
+
+  return deleteRangeInState(i, state.cursorPos);
+}
+
+function deleteWordForwardInState() {
+  if (hasSelection()) {
+    return deleteRangeInState(state.selectionStart, state.selectionEnd);
+  }
+  const text = state.chars.join('');
+  let i = state.cursorPos;
+  if (i >= text.length) return false;
+
+  while (i < text.length && /\s/.test(text[i])) i++;
+  while (i < text.length && !/\s/.test(text[i])) i++;
+
+  return deleteRangeInState(state.cursorPos, i);
+}
+
+function afterStateEdit(save = true) {
+  render();
+  syncInputFromState();
+  if (save) saveToURL();
+  scrollToCursor();
+}
+
+/* ===== hidden textarea 동기화 ===== */
+function ensureSentinel() {
+  if (input.value.startsWith(SENTINEL)) return;
+
+  const start = input.selectionStart ?? 0;
+  const end   = input.selectionEnd ?? start;
+
+  input.value = SENTINEL + input.value.split(SENTINEL).join('');
+
+  try {
+    input.setSelectionRange(
+      Math.max(SENTINEL_LEN, start + SENTINEL_LEN),
+      Math.max(SENTINEL_LEN, end   + SENTINEL_LEN)
+    );
+  } catch (e) {}
+}
+
+function clampNativeSelection() {
+  const valueLen = input.value.length;
+  let start = input.selectionStart ?? SENTINEL_LEN;
+  let end   = input.selectionEnd   ?? start;
+
+  start = clamp(start, SENTINEL_LEN, valueLen);
+  end   = clamp(end,   SENTINEL_LEN, valueLen);
+
+  if (start > end) [start, end] = [end, start];
+
+  if (input.selectionStart !== start || input.selectionEnd !== end) {
+    try { input.setSelectionRange(start, end); } catch (e) {}
+  }
+
+  return { start, end };
+}
+
+function syncInputFromState() {
+  const text = state.chars.join('');
+  const nextValue = SENTINEL + text;
+
+  if (input.value !== nextValue) input.value = nextValue;
+
+  const s = SENTINEL_LEN + clamp(state.selectionStart, 0, state.chars.length);
+  const e = SENTINEL_LEN + clamp(state.selectionEnd,   0, state.chars.length);
+
+  try { input.setSelectionRange(s, e); } catch (e) {}
+}
+
+function syncStateFromInput() {
+  ensureSentinel();
+
+  const text = normalizeText(input.value.slice(SENTINEL_LEN));
+  state.chars = text.split('');
+
+  const { start, end } = clampNativeSelection();
+  setLogicalSelection(start - SENTINEL_LEN, end - SENTINEL_LEN);
+}
+
+function syncFromNativeInput(save = true) {
+  syncStateFromInput();
+  render();
+  if (save) saveToURL();
+  scrollToCursor();
 }
 
 /* ===== LZ ===== */
@@ -591,9 +766,6 @@ const LZ = {
   }
 };
 
-const scroller = document.getElementById('pageContainer');
-const input    = document.getElementById('hiddenInput');
-
 /* ===== URL 저장 / 불러오기 ===== */
 function saveToURL() {
   const hash = LZ.compress(JSON.stringify({
@@ -612,6 +784,9 @@ function loadFromURL() {
     state.chars = data.t ? data.t.split('') : [];
     state.font  = data.f || state.font;
     state.color = data.c || state.color;
+    state.cursorPos = 0;
+    state.selectionStart = 0;
+    state.selectionEnd = 0;
     applySettings();
   } catch(e) {}
 }
@@ -627,26 +802,13 @@ function applySettings() {
 
 /* ===== 레이아웃 계산 ===== */
 function buildLayout() {
-  const displayChars = [...state.chars];
-  let cLen = 0;
-
-  if (state.composing && state.composingText) {
-    const compArr = state.composingText.split('');
-    displayChars.splice(state.cursorPos, 0, ...compArr);
-    cLen = compArr.length;
-  }
-
-  const mapToLogical = (dispIdx) => {
-    if (!state.composing || !state.composingText) return dispIdx;
-    if (dispIdx < state.cursorPos) return dispIdx;
-    if (dispIdx < state.cursorPos + cLen) return state.cursorPos;
-    return dispIdx - cLen;
-  };
+  const displayChars = state.chars.slice();
+  const mapToLogical = (dispIdx) => dispIdx;
 
   const pages = [];
   let page = { rows: [] };
   let row  = { cells: [], overflow: null, isNewlineEnded: false, newlineLogicalIdx: -1 };
-  const cursorDisplayIdx = state.cursorPos + cLen;
+  const cursorDisplayIdx = state.cursorPos;
 
   for (let i = 0; i < displayChars.length; i++) {
     const ch = displayChars[i];
@@ -664,7 +826,7 @@ function buildLayout() {
 
     if (row.cells.length === COLS) {
       const nextCh = displayChars[i + 1];
-      if (nextCh && nextCh !== '\n' && /^[.,?!'""\u2018\u2019\u201C\u201D ]$/.test(nextCh)) {
+      if (nextCh && nextCh !== '\n' && /^[.,?!'"\u2018\u2019\u201C\u201D ]$/.test(nextCh)) {
         row.overflow = { char: nextCh, logicalIdx: mapToLogical(i + 1), dispIdx: i + 1 };
         i++;
       }
@@ -703,7 +865,7 @@ function buildLayout() {
         }
       }
       if (r.overflow)       lastLogical = r.overflow.logicalIdx + 1;
-      if (r.isNewlineEnded)  lastLogical = r.newlineLogicalIdx + 1;
+      if (r.isNewlineEnded) lastLogical = r.newlineLogicalIdx + 1;
     }
   }
 
@@ -714,6 +876,7 @@ function buildLayout() {
 function render() {
   const layout  = buildLayout();
   const wrapper = document.getElementById('zoomWrapper');
+  const selectionActive = hasSelection();
 
   while (wrapper.children.length < layout.pages.length) wrapper.appendChild(createPage(wrapper.children.length));
   while (wrapper.children.length > layout.pages.length) wrapper.removeChild(wrapper.lastChild);
@@ -738,22 +901,38 @@ function render() {
         cellEl.dataset.logicalIdx = cellData.logicalIdx;
 
         let isCursor = false;
-        if (!foundCursor) {
+        if (!selectionActive && !foundCursor) {
           if (cellData.dispIdx === layout.cursorDisplayIdx) {
-            isCursor = true; foundCursor = true;
+            isCursor = true;
+            foundCursor = true;
           } else if (cellData.empty && cellData.logicalIdx >= state.cursorPos) {
-            isCursor = true; foundCursor = true;
+            isCursor = true;
+            foundCursor = true;
           }
         }
 
         const isComposingChar =
-          state.composing && !cellData.empty &&
-          cellData.dispIdx >= state.cursorPos &&
-          cellData.dispIdx <  state.cursorPos + state.composingText.length;
+          state.composing &&
+          state.cursorPos > 0 &&
+          !cellData.empty &&
+          cellData.logicalIdx === state.cursorPos - 1;
+
+        const isSelected =
+          selectionActive &&
+          !cellData.empty &&
+          cellData.logicalIdx >= state.selectionStart &&
+          cellData.logicalIdx < state.selectionEnd;
+
+        const isSelectionFocus =
+          selectionActive &&
+          !cellData.empty &&
+          cellData.logicalIdx === state.selectionEnd - 1;
 
         cellEl.className = 'grid-cell';
-        if (isCursor && !state.composing) cellEl.classList.add('cursor-cell');
-        if (isComposingChar)              cellEl.classList.add('composing-cell');
+        if (isCursor && !state.composing && !selectionActive) cellEl.classList.add('cursor-cell');
+        if (isSelected)                                       cellEl.classList.add('selected-cell');
+        if (isSelectionFocus)                                 cellEl.classList.add('selection-focus-cell');
+        if (isComposingChar)                                  cellEl.classList.add('composing-cell');
       }
 
       let overflowEl = rowEl.querySelector('.overflow-cell');
@@ -793,7 +972,7 @@ function focusInput() {
   input.focus({ preventScroll: true });
 }
 
-/* ===== 터치 이벤트 ===== */
+/* ===== 터치 / 포인터 ===== */
 let touchStartX = 0, touchStartY = 0;
 
 document.addEventListener('touchstart', (e) => {
@@ -805,6 +984,7 @@ document.addEventListener('touchstart', (e) => {
 
 document.addEventListener('touchend', (e) => {
   if (e.target.closest('.toolbar')) return;
+
   const t    = e.changedTouches[0];
   const dist = Math.hypot(t.clientX - touchStartX, t.clientY - touchStartY);
 
@@ -814,25 +994,25 @@ document.addEventListener('touchend', (e) => {
     if (cell) {
       const idx = parseInt(cell.dataset.logicalIdx, 10);
       if (!isNaN(idx)) {
-        state.cursorPos = Math.min(idx, state.chars.length);
-        render();
+        state.composing = false;
+        setLogicalSelection(idx, idx, { renderView: true, syncInput: true });
       }
     }
     focusInput();
   }
 }, { passive: false });
 
-/* 마우스 전용 (데스크톱) */
 document.addEventListener('pointerdown', (e) => {
   if (e.pointerType !== 'mouse') return;
   if (e.target.closest('.toolbar')) return;
+
   const cell = e.target.closest('.grid-cell');
   if (cell) {
     e.preventDefault();
     const idx = parseInt(cell.dataset.logicalIdx, 10);
     if (!isNaN(idx)) {
-      state.cursorPos = Math.min(idx, state.chars.length);
-      render();
+      state.composing = false;
+      setLogicalSelection(idx, idx, { renderView: true, syncInput: true });
     }
   } else if (!e.target.closest('.page-container')) {
     return;
@@ -850,146 +1030,206 @@ document.addEventListener('click', (e) => {
   }
 });
 
-/* ===== IME 이벤트 ===== */
+/* ===== IME / 입력 / 선택 범위 안정화 ===== */
+let selectionSyncRAF = 0;
+
+function scheduleSelectionSync(scroll = false) {
+  if (selectionSyncRAF) cancelAnimationFrame(selectionSyncRAF);
+  selectionSyncRAF = requestAnimationFrame(() => {
+    selectionSyncRAF = 0;
+    if (document.activeElement !== input) return;
+    syncStateFromInput();
+    render();
+    if (scroll) scrollToCursor();
+  });
+}
+
+input.addEventListener('focus', () => {
+  ensureSentinel();
+  syncInputFromState();
+});
+
+input.addEventListener('blur', () => {
+  state.composing = false;
+  render();
+});
+
+input.addEventListener('select', () => {
+  scheduleSelectionSync(false);
+});
+
+document.addEventListener('selectionchange', () => {
+  if (document.activeElement === input) {
+    scheduleSelectionSync(false);
+  }
+});
+
+input.addEventListener('beforeinput', (e) => {
+  if (!MANUAL_BEFOREINPUT_TYPES.has(e.inputType)) return;
+
+  syncStateFromInput();
+
+  if (state.composing || e.isComposing) return;
+  if (!e.cancelable) return;
+
+  let changed = false;
+
+  switch (e.inputType) {
+    case 'deleteContentBackward':
+      e.preventDefault();
+      changed = deleteBackwardInState();
+      break;
+
+    case 'deleteContentForward':
+      e.preventDefault();
+      changed = deleteForwardInState();
+      break;
+
+    case 'deleteWordBackward':
+      e.preventDefault();
+      changed = deleteWordBackwardInState();
+      break;
+
+    case 'deleteWordForward':
+      e.preventDefault();
+      changed = deleteWordForwardInState();
+      break;
+
+    case 'insertParagraph':
+    case 'insertLineBreak':
+      e.preventDefault();
+      changed = replaceRangeInState(state.selectionStart, state.selectionEnd, '\n');
+      break;
+  }
+
+  if (changed) {
+    afterStateEdit(true);
+  } else {
+    render();
+    syncInputFromState();
+  }
+});
+
+input.addEventListener('paste', (e) => {
+  if (state.composing) return;
+  const pasted = e.clipboardData?.getData('text/plain');
+  if (typeof pasted !== 'string' || pasted.length === 0) return;
+
+  e.preventDefault();
+  syncStateFromInput();
+  replaceRangeInState(state.selectionStart, state.selectionEnd, pasted);
+  afterStateEdit(true);
+});
+
+input.addEventListener('cut', () => {
+  requestAnimationFrame(() => {
+    syncFromNativeInput(true);
+  });
+});
 
 input.addEventListener('compositionstart', () => {
-  if (compositionTimer !== null) {
-    /*
-     * [iPad 한글 IME 보정]
-     * 동일한 키 입력 처리 태스크 내에서 compositionend 직후 compositionstart 가
-     * 연속 발생하는 경우 → 중간 단계이므로 타이머를 취소하고 삽입하지 않는다.
-     *
-     * composingText 는 건드리지 않는다.
-     * 이전 조합 글자('ㅇ' 등)를 그대로 유지하다가
-     * compositionupdate 에서 새 값('아' 등)으로 교체되므로
-     * 화면 깜빡임이 최소화된다.
-     */
-    clearTimeout(compositionTimer);
-    compositionTimer             = null;
-    pendingCompositionText       = '';
-    pendingCharsAfterComposition = '';
-    /* state.composing 은 이미 true — render 는 compositionupdate 에서 호출 */
-    return;
-  }
-  state.composing     = true;
-  state.composingText = '';
-  render();
-});
-
-input.addEventListener('compositionupdate', (e) => {
-  state.composing     = true;           // 타이머 취소 후 재진입 시에도 보장
-  state.composingText = e.data || '';
-  render();
-});
-
-input.addEventListener('compositionend', (e) => {
-  /*
-   * [iPad 한글 IME 보정]
-   * 즉시 삽입하지 않고 setTimeout(0) 으로 지연한다.
-   *  - 같은 태스크 내에서 compositionstart 가 뒤따르면 → 타이머 취소 (중간 단계)
-   *  - compositionstart 가 없으면 → 타이머 실행 → 최종 확정 삽입
-   *
-   * composingText 는 여기서 지우지 않는다.
-   * 타이머가 실행될 때까지 현재 조합 글자를 화면에 그대로 표시한다.
-   */
-  const fallback = input.value.replace(SENTINEL, '');
-  pendingCompositionText       = (e.data && e.data.length > 0) ? e.data : fallback;
-  pendingCharsAfterComposition = '';
-
-  compositionTimer = setTimeout(() => {
-    compositionTimer    = null;
-    state.composing     = false;
-    state.composingText = '';
-
-    const text = pendingCompositionText;
-    pendingCompositionText = '';
-    if (text) {
-      for (const ch of text) {
-        state.chars.splice(state.cursorPos, 0, ch);
-        state.cursorPos++;
-      }
-    }
-
-    /* 조합 직후 버퍼된 문자(예: 공백) 처리 */
-    if (pendingCharsAfterComposition) {
-      for (const ch of pendingCharsAfterComposition) {
-        state.chars.splice(state.cursorPos, 0, ch);
-        state.cursorPos++;
-      }
-      pendingCharsAfterComposition = '';
-    }
-
-    resetInput();
+  state.composing = true;
+  requestAnimationFrame(() => {
+    syncStateFromInput();
     render();
-    saveToURL();
     scrollToCursor();
-  }, 0);
+  });
 });
 
-input.addEventListener('input', (e) => {
-  if (e.isComposing) return;
+input.addEventListener('compositionupdate', () => {
+  requestAnimationFrame(() => {
+    syncStateFromInput();
+    render();
+    scrollToCursor();
+  });
+});
 
-  /*
-   * compositionend 직후 타이머 대기 중:
-   *  - composition 결과 자체(e.data === pendingCompositionText)는 건너뜀
-   *    (타이머에서 이미 처리 예정)
-   *  - 그 외 새 문자(예: 조합 종료 후 입력된 공백)는 버퍼에 저장
-   */
-  if (compositionTimer !== null) {
-    if (e.data && e.data !== pendingCompositionText) {
-      pendingCharsAfterComposition += e.data;
-    }
-    return;
-  }
+input.addEventListener('compositionend', () => {
+  state.composing = false;
+  requestAnimationFrame(() => {
+    syncFromNativeInput(true);
+  });
+});
 
-  if (state.composing) return;
-
-  const text = input.value.replace(SENTINEL, '');
-  if (!text) return;
-  for (const ch of text) {
-    state.chars.splice(state.cursorPos, 0, ch);
-    state.cursorPos++;
-  }
-  resetInput();
-  render();
-  saveToURL();
-  scrollToCursor();
+input.addEventListener('input', () => {
+  syncFromNativeInput(!state.composing);
 });
 
 input.addEventListener('keydown', (e) => {
+  const lowerKey = e.key.toLowerCase();
+  const navKeys = new Set([
+    'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+    'Home', 'End', 'PageUp', 'PageDown'
+  ]);
+
+  if ((e.metaKey || e.ctrlKey) && !e.altKey && lowerKey === 'a') {
+    e.preventDefault();
+    setLogicalSelection(0, state.chars.length, {
+      renderView: true,
+      syncInput: true,
+      scroll: true
+    });
+    return;
+  }
+
+  if (navKeys.has(e.key)) {
+    requestAnimationFrame(() => {
+      syncStateFromInput();
+      render();
+      scrollToCursor();
+    });
+  }
+
+  if (supportsBeforeInput) return;
   if (state.composing) return;
 
-  if (e.key === 'Backspace' && state.cursorPos > 0) {
+  let changed = false;
+
+  if (e.key === 'Backspace') {
     e.preventDefault();
-    state.chars.splice(state.cursorPos - 1, 1);
-    state.cursorPos--;
-    render(); saveToURL(); scrollToCursor();
-  } else if (e.key === 'Delete' && state.cursorPos < state.chars.length) {
+    syncStateFromInput();
+    changed = deleteBackwardInState();
+  } else if (e.key === 'Delete') {
     e.preventDefault();
-    state.chars.splice(state.cursorPos, 1);
-    render(); saveToURL();
+    syncStateFromInput();
+    changed = deleteForwardInState();
   } else if (e.key === 'Enter') {
     e.preventDefault();
-    state.chars.splice(state.cursorPos, 0, '\n');
-    state.cursorPos++;
-    render(); saveToURL(); scrollToCursor();
-  } else if (e.key === 'ArrowLeft' && state.cursorPos > 0) {
-    state.cursorPos--;
-    render(); scrollToCursor();
-  } else if (e.key === 'ArrowRight' && state.cursorPos < state.chars.length) {
-    state.cursorPos++;
-    render(); scrollToCursor();
+    syncStateFromInput();
+    changed = replaceRangeInState(state.selectionStart, state.selectionEnd, '\n');
+  }
+
+  if (changed) {
+    afterStateEdit(true);
+  }
+});
+
+input.addEventListener('keyup', (e) => {
+  const keys = new Set([
+    'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+    'Home', 'End', 'PageUp', 'PageDown', 'Shift'
+  ]);
+  if (keys.has(e.key)) {
+    scheduleSelectionSync(true);
   }
 });
 
 function scrollToCursor() {
   requestAnimationFrame(() => {
-    const el = document.querySelector('.cursor-cell, .composing-cell');
+    let el = document.querySelector('.cursor-cell, .composing-cell, .selection-focus-cell');
+
+    if (!el) {
+      const selected = document.querySelectorAll('.selected-cell');
+      if (selected.length) el = selected[selected.length - 1];
+    }
+
     if (!el) return;
+
     const containerRect = scroller.getBoundingClientRect();
     const rect          = el.getBoundingClientRect();
     const topLimit      = containerRect.top + 90;
     const bottomLimit   = containerRect.bottom - 70;
+
     if (rect.top < topLimit) {
       scroller.scrollBy({ top: rect.top - topLimit, behavior: 'smooth' });
     } else if (rect.bottom > bottomLimit) {
@@ -1096,8 +1336,16 @@ function closeMenuOnCompact() {
 /* ===== 액션 ===== */
 function newDocument() {
   if (confirm('모든 내용이 지워집니다. 새로 시작할까요?')) {
-    state.chars = []; state.cursorPos = 0;
-    render(); saveToURL(); focusInput(); closeMenuOnCompact();
+    state.chars = [];
+    state.cursorPos = 0;
+    state.selectionStart = 0;
+    state.selectionEnd = 0;
+    state.composing = false;
+    render();
+    saveToURL();
+    syncInputFromState();
+    focusInput();
+    closeMenuOnCompact();
   }
 }
 
@@ -1122,12 +1370,17 @@ function doPrint() {
 }
 
 function copyURL() {
-  navigator.clipboard.writeText(location.href).then(() => showToast('현재 문서 주소가 복사되었습니다.'));
+  navigator.clipboard.writeText(location.href).then(() => {
+    showToast('현재 문서 주소가 복사되었습니다.');
+  });
   closeMenuOnCompact();
 }
 
 function copyText() {
-  navigator.clipboard.writeText(state.chars.join('')).then(() => showToast('텍스트가 복사되었습니다.'));
+  const text = hasSelection() ? getSelectedText() : state.chars.join('');
+  navigator.clipboard.writeText(text).then(() => {
+    showToast(hasSelection() ? '선택한 텍스트가 복사되었습니다.' : '텍스트가 복사되었습니다.');
+  });
   closeMenuOnCompact();
 }
 
@@ -1143,7 +1396,8 @@ document.addEventListener('DOMContentLoaded', () => {
   loadFromURL();
   applySettings();
   render();
-  resetInput();
+  syncInputFromState();
+
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       initMobileZoom();
