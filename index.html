@@ -47,7 +47,7 @@ html, body {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex: 0 0 auto;
+  flex: 1 1 auto; /* 모바일에서 좌측 영역을 유연하게 활용 */
   min-width: 0;
 }
 
@@ -66,6 +66,31 @@ html, body {
   justify-content: center; align-items: center;
   flex: 0 0 42px;
 }
+
+/* ===== 아이콘 버튼 (되돌리기 / 다시실행) ===== */
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+.icon-btn:hover:not(:disabled) { background: rgba(255,255,255,0.15); }
+.icon-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.icon-btn svg {
+  width: 20px; height: 20px;
+  stroke: currentColor; stroke-width: 2.5;
+  fill: none; stroke-linecap: round; stroke-linejoin: round;
+}
+
+.mobile-undo-redo { display: none; align-items: center; gap: 4px; }
+.desktop-undo-redo { display: flex; align-items: center; gap: 4px; }
+
 
 .toolbar-menu {
   flex: 1 1 auto;
@@ -183,6 +208,10 @@ html, body {
 
 /* ===== COMPACT MODE ===== */
 .toolbar.compact .menu-toggle { display: inline-flex; }
+
+/* 모바일 콤팩트 모드일 때 Undo/Redo 버튼 위치 스위칭 */
+.toolbar.compact .mobile-undo-redo { display: flex; }
+.toolbar.compact .desktop-undo-redo { display: none; }
 
 .toolbar.compact .toolbar-menu {
   display: none;
@@ -494,6 +523,10 @@ html, body {
 <div class="toolbar" id="toolbar">
   <div class="toolbar-left">
     <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()">☰</button>
+    <div class="mobile-undo-redo">
+      <button class="icon-btn btn-undo" onclick="undo()" title="되돌리기 (Ctrl+Z)"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a4 4 0 0 1 0 8h-1"/></svg></button>
+      <button class="icon-btn btn-redo" onclick="redo()" title="다시실행 (Ctrl+Y)"><svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H9a4 4 0 0 0 0 8h1"/></svg></button>
+    </div>
     <div class="toolbar-title">원고지 쓰기</div>
   </div>
 
@@ -510,6 +543,10 @@ html, body {
         <button class="color-btn color-red active"  data-color="#c0392b" onclick="changeColor(this)" title="빨강"></button>
         <button class="color-btn color-darkgray"    data-color="#555555" onclick="changeColor(this)" title="회색"></button>
         <button class="color-btn color-black"       data-color="#222222" onclick="changeColor(this)" title="검정"></button>
+      </div>
+      <div class="desktop-undo-redo">
+        <button class="icon-btn btn-undo" onclick="undo()" title="되돌리기 (Ctrl+Z)"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a4 4 0 0 1 0 8h-1"/></svg></button>
+        <button class="icon-btn btn-redo" onclick="redo()" title="다시실행 (Ctrl+Y)"><svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H9a4 4 0 0 0 0 8h1"/></svg></button>
       </div>
     </div>
 
@@ -575,6 +612,78 @@ const MANUAL_BEFOREINPUT_TYPES = new Set([
   'insertParagraph',
   'insertLineBreak'
 ]);
+
+/* ===== Undo / Redo 기능 ===== */
+const MAX_HISTORY = 30;
+let historyStack = [];
+let historyIndex = -1;
+
+function saveHistory(force = false) {
+  const currentState = {
+    c: [...state.chars],
+    s: state.selectionStart,
+    e: state.selectionEnd
+  };
+
+  // 텍스트 변화가 없을 때는 무의미한 커서 이동 기록 방지 (강제 저장 제외)
+  if (!force && historyIndex >= 0) {
+    const prev = historyStack[historyIndex];
+    const currentText = currentState.c.join('');
+    const prevText = prev.c.join('');
+    if (currentText === prevText) return; 
+  }
+
+  // 과거로 되돌린 상태에서 새로운 입력을 하면 그 이후의 미래 기록은 삭제
+  if (historyIndex < historyStack.length - 1) {
+    historyStack = historyStack.slice(0, historyIndex + 1);
+  }
+
+  historyStack.push(currentState);
+  if (historyStack.length > MAX_HISTORY) {
+    historyStack.shift();
+  } else {
+    historyIndex++;
+  }
+  updateUndoRedoUI();
+}
+
+function restoreHistory(idx) {
+  if (idx < 0 || idx >= historyStack.length) return;
+  const item = historyStack[idx];
+  state.chars = [...item.c];
+  state.selectionStart = item.s;
+  state.selectionEnd = item.e;
+  state.cursorPos = item.e;
+  historyIndex = idx;
+
+  render();
+  syncInputFromState();
+  saveToURL();
+  scrollToCursor();
+  updateUndoRedoUI();
+  focusInput();
+}
+
+function undo() {
+  if (historyIndex > 0) {
+    restoreHistory(historyIndex - 1);
+  }
+}
+
+function redo() {
+  if (historyIndex < historyStack.length - 1) {
+    restoreHistory(historyIndex + 1);
+  }
+}
+
+function updateUndoRedoUI() {
+  document.querySelectorAll('.btn-undo').forEach(b => {
+    b.disabled = historyIndex <= 0;
+  });
+  document.querySelectorAll('.btn-redo').forEach(b => {
+    b.disabled = historyIndex >= historyStack.length - 1;
+  });
+}
 
 /* ===== 유틸 ===== */
 function clamp(n, min, max) {
@@ -715,7 +824,10 @@ function afterStateEdit(save = true) {
   applyAutoReplace();
   render();
   syncInputFromState();
-  if (save) saveToURL();
+  if (save) {
+    saveToURL();
+    saveHistory();
+  }
   scrollToCursor();
 }
 
@@ -782,7 +894,10 @@ function syncStateFromInput() {
 function syncFromNativeInput(save = true) {
   syncStateFromInput();
   render();
-  if (save) saveToURL();
+  if (save) {
+    saveToURL();
+    saveHistory();
+  }
   scrollToCursor();
 }
 
@@ -1075,6 +1190,25 @@ document.addEventListener('click', (e) => {
   }
 });
 
+/* ===== 단축키 글로벌 이벤트 핸들러 (윈도우, 맥 공통 지원) ===== */
+document.addEventListener('keydown', (e) => {
+  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+
+  if (cmdOrCtrl && !e.altKey) {
+    const key = e.key.toLowerCase();
+    
+    if (key === 'z') {
+      e.preventDefault(); // 브라우저 기본 되돌리기 방지
+      if (e.shiftKey) redo();
+      else undo();
+    } else if (key === 'y') {
+      e.preventDefault();
+      redo();
+    }
+  }
+});
+
 /* ===== IME / 입력 / 선택 범위 안정화 ===== */
 let selectionSyncRAF = 0;
 
@@ -1207,7 +1341,11 @@ input.addEventListener('keydown', (e) => {
     'Home', 'End', 'PageUp', 'PageDown'
   ]);
 
-  if ((e.metaKey || e.ctrlKey) && !e.altKey && lowerKey === 'a') {
+  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+
+  // 전체 선택 단축키 (Ctrl+A / Cmd+A)
+  if (cmdOrCtrl && !e.altKey && lowerKey === 'a') {
     e.preventDefault();
     setLogicalSelection(0, state.chars.length, {
       renderView: true,
@@ -1215,6 +1353,12 @@ input.addEventListener('keydown', (e) => {
       scroll: true
     });
     return;
+  }
+
+  // Ctrl+Z 등 단축키는 상단 Document 리스너에서 처리하므로 textarea에서는 기본 동작 방지만 수행
+  if (cmdOrCtrl && !e.altKey && (lowerKey === 'z' || lowerKey === 'y')) {
+    e.preventDefault();
+    return; 
   }
 
   if (navKeys.has(e.key)) {
@@ -1360,6 +1504,8 @@ function updateToolbarMode() {
   const left        = toolbar.querySelector('.toolbar-left');
   toolbar.classList.remove('compact');
   toolbarMenu.classList.remove('open');
+  
+  // 모바일/데스크탑 모드 측정
   const availableWidth = toolbar.clientWidth - 24;
   const neededWidth    = left.offsetWidth + getMenuNaturalWidth() + 24;
   if (neededWidth > availableWidth) toolbar.classList.add('compact');
@@ -1386,6 +1532,12 @@ function newDocument() {
     state.selectionStart = 0;
     state.selectionEnd = 0;
     state.composing = false;
+    
+    // 히스토리 초기화
+    historyStack = [];
+    historyIndex = -1;
+    saveHistory(true); 
+
     render();
     saveToURL();
     syncInputFromState();
@@ -1442,6 +1594,9 @@ document.addEventListener('DOMContentLoaded', () => {
   applySettings();
   render();
   syncInputFromState();
+  
+  // 첫 진입 시 히스토리에 현재(초기) 상태 저장
+  saveHistory(true);
 
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
