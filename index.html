@@ -109,8 +109,7 @@ html, body {
 .punct-combo .p1 { position: absolute; left: 6px; bottom: 4px; line-height: 1; }
 .punct-combo .p2 { position: absolute; right: 6px; top: 4px; line-height: 1; }
 
-.overflow-cell { position: absolute; right: calc(var(--cell-size) * -1); top: 0; width: var(--cell-size); height: var(--cell-size); display: flex; align-items: center; justify-content: center; font-size: var(--font-size); color: #111; pointer-events: none; }
-/* 여백에 찍히는 마침표/쉼표도 좌측 하단으로 정렬 */
+.overflow-cell { position: absolute; right: calc(var(--cell-size) * -1); top: 0; width: var(--cell-size); height: var(--cell-size); display: flex; align-items: center; justify-content: center; font-size: var(--font-size); color: #111; pointer-events: none; line-height: 1; }/* 여백에 찍히는 마침표/쉼표도 좌측 하단으로 정렬 */
 .overflow-cell.punct-left { justify-content: flex-start; align-items: flex-end; padding-left: 6px; padding-bottom: 4px; }
 
 /* 커서 및 선택 영역 상태 스타일 */
@@ -724,7 +723,7 @@ let touchStartX = 0, touchStartY = 0;
 document.addEventListener('touchstart', (e) => {
   if (e.target.closest('.toolbar')) return;
   touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
-  focusInput();
+  // focusInput(); // <-- 삭제: 여기서 포커스를 주면 모바일에서 키보드가 곧바로 사라지는 원인이 됩니다.
 }, { passive: true });
 
 document.addEventListener('touchend', (e) => {
@@ -733,6 +732,9 @@ document.addEventListener('touchend', (e) => {
   const dist = Math.hypot(t.clientX - touchStartX, t.clientY - touchStartY);
 
   if (dist < 12) {
+    // 탭으로 판정된 경우 브라우저 기본 클릭 동작을 막아 포커스 해제(blur)를 방지합니다.
+    if (e.cancelable) e.preventDefault();
+
     const cell = document.elementFromPoint(t.clientX, t.clientY)?.closest('.grid-cell');
     if (cell) {
       let idx = parseInt(cell.dataset.logicalIdx, 10);
@@ -746,6 +748,7 @@ document.addEventListener('touchend', (e) => {
         setLogicalSelection(idx, idx, { renderView: true, syncInput: true });
       }
     }
+    // 위치 계산이 모두 끝난 후 포커스를 줍니다.
     focusInput();
   }
 }, { passive: false });
