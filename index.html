@@ -565,6 +565,7 @@ function buildLayout() {
 
   // 남은 셀 처리
   if (row.cells.length > 0 || displayChars[displayChars.length - 1] === '\n' || displayChars.length === 0) page.rows.push(row);
+  if (page.rows.length > 0) pages.push(page);
   if (pages.length === 0) pages.push({ rows: [{ cells: [], overflow: null, isNewlineEnded: false, newlineLogicalIdx: -1 }] });
 
   // 빈 칸(Empty cells) 채워넣기
