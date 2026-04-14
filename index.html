@@ -25,389 +25,119 @@ html, body {
   background: #e8e4df;
   font-family: var(--font-family);
   overflow: hidden;
-  /* 모바일 기기 네이티브 더블 탭 확대 방지 */
   touch-action: manipulation; 
 }
 
 /* ===== TOOLBAR ===== */
 .toolbar {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  min-height: var(--toolbar-height);
-  background: #2c2c2c;
-  color: #fff;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  padding: 8px 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  font-family: 'Noto Sans KR', sans-serif;
+  position: fixed; top: 0; left: 0; right: 0; min-height: var(--toolbar-height);
+  background: #2c2c2c; color: #fff; z-index: 1000; display: flex; align-items: center;
+  padding: 8px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); font-family: 'Noto Sans KR', sans-serif;
 }
-
-.toolbar-mobile-left {
-  display: none; 
-}
-
-.toolbar-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #fff;
-  white-space: nowrap;
-  margin-right: 16px;
-  flex-shrink: 0;
-}
-
-.toolbar-menu {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  min-width: 0;
-}
-
-.toolbar-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* 데스크탑 레이아웃 그룹 */
-.document-group {
-  flex-wrap: nowrap;
-}
-
-.zoom-group {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.action-group {
-  margin-left: auto;
-}
-
-.menu-toggle {
-  width: 42px; min-width: 42px; height: 40px;
-  padding: 0 !important;
-  font-size: 18px; line-height: 1;
-  justify-content: center; align-items: center;
-  flex: 0 0 42px;
-  background: #444; color: #fff; border: 1px solid #555; border-radius: 8px;
-  cursor: pointer;
-}
-
-.toolbar button,
-.toolbar select {
-  background: #444;
-  color: #fff;
-  border: 1px solid #555;
-  border-radius: 8px;
-  padding: 8px 11px;
-  font-size: 13px;
-  cursor: pointer;
-  font-family: 'Noto Sans KR', sans-serif;
-  white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-}
+.toolbar-mobile-left { display: none; }
+.toolbar-title { font-size: 16px; font-weight: 700; color: #fff; white-space: nowrap; margin-right: 16px; flex-shrink: 0; }
+.toolbar-menu { flex: 1; display: flex; align-items: center; min-width: 0; }
+.toolbar-group { display: flex; align-items: center; gap: 8px; }
+.document-group { flex-wrap: nowrap; }
+.zoom-group { position: absolute; left: 50%; transform: translateX(-50%); }
+.action-group { margin-left: auto; }
+.menu-toggle { width: 42px; min-width: 42px; height: 40px; padding: 0 !important; font-size: 18px; line-height: 1; justify-content: center; align-items: center; flex: 0 0 42px; background: #444; color: #fff; border: 1px solid #555; border-radius: 8px; cursor: pointer; }
+.toolbar button, .toolbar select { background: #444; color: #fff; border: 1px solid #555; border-radius: 8px; padding: 8px 11px; font-size: 13px; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
 .toolbar button:hover, .toolbar select:hover { background: #555; }
+.toolbar select { min-width: 150px; text-align: center; text-align-last: center; appearance: auto; }
 
-.toolbar select {
-  min-width: 150px;
-  text-align: center;
-  text-align-last: center;
-  appearance: auto;
-}
-
-/* ===== 아이콘 버튼 (되돌리기 / 다시실행) ===== */
-.icon-btn {
-  background: transparent !important;
-  border: none !important;
-  color: #fff;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px !important;
-  border-radius: 6px !important;
-  transition: background 0.2s;
-}
+/* ===== 아이콘 버튼 ===== */
+.icon-btn { background: transparent !important; border: none !important; color: #fff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 6px !important; border-radius: 6px !important; transition: background 0.2s; }
 .icon-btn:hover:not(:disabled) { background: rgba(255,255,255,0.15) !important; }
 .icon-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-.icon-btn svg {
-  width: 20px; height: 20px;
-  stroke: currentColor; stroke-width: 2.5;
-  fill: none; stroke-linecap: round; stroke-linejoin: round;
-}
-
+.icon-btn svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .desktop-undo-redo { display: flex; align-items: center; gap: 4px; }
 .mobile-undo-redo { display: flex; align-items: center; gap: 4px; }
-
-.btn-primary {
-  background: #2980b9 !important;
-  border-color: #3498db !important;
-  font-weight: 700;
-}
+.btn-primary { background: #2980b9 !important; border-color: #3498db !important; font-weight: 700; }
 .btn-primary:hover { background: #3498db !important; }
 
-.color-set {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #3a3a3a;
-  border: 1px solid #555;
-  border-radius: 10px;
-  padding: 6px 8px;
-  flex: 0 0 auto;
-}
+.color-set { display: flex; align-items: center; gap: 8px; background: #3a3a3a; border: 1px solid #555; border-radius: 10px; padding: 6px 8px; flex: 0 0 auto; }
+.color-btn { width: 28px !important; height: 28px !important; min-width: 28px !important; min-height: 28px !important; border-radius: 50% !important; padding: 0 !important; border: 2px solid #777 !important; flex: 0 0 28px !important; aspect-ratio: 1 / 1; box-sizing: border-box; }
+.color-btn.active { border-color: #fff !important; box-shadow: 0 0 0 2px rgba(255,255,255,0.18); }
+.color-red { background: #c0392b !important; } .color-darkgray { background: #555555 !important; } .color-black { background: #222222 !important; }
 
-.color-btn {
-  width: 28px !important; height: 28px !important;
-  min-width: 28px !important; min-height: 28px !important;
-  border-radius: 50% !important;
-  padding: 0 !important;
-  border: 2px solid #777 !important;
-  flex: 0 0 28px !important;
-  aspect-ratio: 1 / 1;
-  box-sizing: border-box;
-}
-.color-btn.active {
-  border-color: #fff !important;
-  box-shadow: 0 0 0 2px rgba(255,255,255,0.18);
-}
-.color-red      { background: #c0392b !important; }
-.color-darkgray { background: #555555 !important; }
-.color-black    { background: #222222 !important; }
-
-.zoom-control {
-  display: inline-flex;
-  align-items: center;
-  background: #444;
-  border-radius: 8px;
-  border: 1px solid #555;
-  overflow: hidden;
-  flex: 0 0 auto;
-}
-.zoom-control button {
-  border: none !important; border-radius: 0 !important;
-  background: transparent !important;
-  padding: 8px 10px; min-width: 34px;
-}
+.zoom-control { display: inline-flex; align-items: center; background: #444; border-radius: 8px; border: 1px solid #555; overflow: hidden; flex: 0 0 auto; }
+.zoom-control button { border: none !important; border-radius: 0 !important; background: transparent !important; padding: 8px 10px; min-width: 34px; }
 .zoom-control button:hover { background: #555 !important; }
-.zoom-label {
-  font-size: 12px; min-width: 48px;
-  text-align: center; padding: 0 6px;
-  pointer-events: none; color: #f0f0f0;
-}
+.zoom-label { font-size: 12px; min-width: 48px; text-align: center; padding: 0 6px; pointer-events: none; color: #f0f0f0; }
 
 /* ===== COMPACT MODE (Mobile) ===== */
-.toolbar.compact {
-  justify-content: flex-start;
-  padding: 8px 12px;
-  position: relative; /* 타이틀 중앙 정렬을 위한 기준점 */
-}
-
-.toolbar.compact .toolbar-mobile-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.toolbar.compact .toolbar-title {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-right: 0;
-}
-
+.toolbar.compact { justify-content: flex-start; padding: 8px 12px; position: relative; }
+.toolbar.compact .toolbar-mobile-left { display: flex; align-items: center; gap: 8px; }
+.toolbar.compact .toolbar-title { position: absolute; left: 50%; transform: translateX(-50%); margin-right: 0; }
 .toolbar.compact .desktop-undo-redo { display: none; }
-
-.toolbar.compact .toolbar-menu {
-  display: none;
-  position: absolute;
-  top: calc(var(--toolbar-height) + 6px);
-  left: 12px; right: auto;
-  width: min(360px, calc(100vw - 24px));
-  background: #2c2c2c;
-  padding: 12px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.32);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 12px;
-  max-height: calc(100vh - var(--toolbar-height) - 16px);
-  overflow-y: auto;
-}
-
-.toolbar.compact .toolbar-menu.open {
-  display: flex;
-}
-
-.toolbar.compact .zoom-group {
-  position: static;
-  transform: none;
-  justify-content: center;
-}
-
-.toolbar.compact .action-group {
-  margin-left: 0;
-}
-
-.toolbar.compact .toolbar-group {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
-}
-
-.toolbar.compact button:not(.icon-btn),
-.toolbar.compact select {
-  width: 100%; min-height: 42px;
-  font-size: 14px; justify-content: center;
-}
-.toolbar.compact select { text-align: center; text-align-last: center; }
+.toolbar.compact .toolbar-menu { display: none; position: absolute; top: calc(var(--toolbar-height) + 6px); left: 12px; right: auto; width: min(360px, calc(100vw - 24px)); background: #2c2c2c; padding: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.32); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; flex-direction: column; align-items: stretch; gap: 12px; max-height: calc(100vh - var(--toolbar-height) - 16px); overflow-y: auto; }
+.toolbar.compact .toolbar-menu.open { display: flex; }
+.toolbar.compact .zoom-group { position: static; transform: none; justify-content: center; }
+.toolbar.compact .action-group { margin-left: 0; }
+.toolbar.compact .toolbar-group { width: 100%; display: grid; grid-template-columns: 1fr; gap: 8px; }
+.toolbar.compact button:not(.icon-btn), .toolbar.compact select { width: 100%; min-height: 42px; font-size: 14px; justify-content: center; }
 .toolbar.compact .color-set { width: 100%; justify-content: center; padding: 8px 10px; }
 .toolbar.compact .zoom-control { width: 100%; justify-content: stretch; }
 .toolbar.compact .zoom-control button { flex: 1 1 0; }
-.toolbar.compact .zoom-label {
-  flex: 0 0 64px;
-  display: flex; align-items: center; justify-content: center;
-}
+.toolbar.compact .zoom-label { flex: 0 0 64px; display: flex; align-items: center; justify-content: center; }
 
 @media (max-width: 640px) {
-  .toolbar.compact .toolbar-menu {
-    left: 0; right: 0;
-    top: calc(var(--toolbar-height) - 2px);
-    width: auto;
-    border-radius: 0 0 14px 14px;
-    border-left: none; border-right: none;
-  }
+  .toolbar.compact .toolbar-menu { left: 0; right: 0; top: calc(var(--toolbar-height) - 2px); width: auto; border-radius: 0 0 14px 14px; border-left: none; border-right: none; }
 }
 
 /* ===== PAGE AREA ===== */
-.page-container {
-  position: fixed;
-  top: var(--toolbar-height);
-  left: 0; right: 0; bottom: 0;
-  padding: 28px 0 60px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
-}
-
-.zoom-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 40px;
-  transform-origin: top center;
-  transition: transform 0.2s ease-out;
-  width: 100%;
-  min-height: min-content;
-}
-
-.page {
-  background: #fff;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-  position: relative;
-  width: 794px; height: 1123px;
-  padding: 60px 47px;
-  flex-shrink: 0;
-}
-
-.page-header {
-  display: flex;
-  justify-content: flex-end;
-  align-items: baseline;
-  padding: 0 4px 10px 0;
-  font-family: 'Noto Serif KR', serif;
-  color: #333; font-size: 14px; gap: 6px;
-}
+.page-container { position: fixed; top: var(--toolbar-height); left: 0; right: 0; bottom: 0; padding: 28px 0 60px; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+.zoom-wrapper { display: flex; flex-direction: column; align-items: center; gap: 40px; transform-origin: top center; transition: transform 0.2s ease-out; width: 100%; min-height: min-content; }
+.page { background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.15); position: relative; width: 794px; height: 1123px; padding: 60px 47px; flex-shrink: 0; }
+.page-header { display: flex; justify-content: flex-end; align-items: baseline; padding: 0 4px 10px 0; font-family: 'Noto Serif KR', serif; color: #333; font-size: 14px; gap: 6px; }
 .page-header .page-no-label { font-size: 12px; color: #555; letter-spacing: 1px; }
 .page-header .page-no { font-size: 24px; font-weight: 700; color: #333; }
 
 /* ===== GRID ===== */
-.grid-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: fit-content;
-  margin: 0 auto;
-}
-.grid-row {
-  display: flex;
-  border: 2px solid var(--grid-color);
-  position: relative;
-}
-.grid-cell {
-  width: var(--cell-size); height: var(--cell-size);
-  flex: 0 0 var(--cell-size);
-  border-right: 1px solid var(--grid-color);
-  box-sizing: border-box;
-  display: flex;
-  align-items: center; justify-content: center;
-  font-size: var(--font-size);
-  font-family: var(--font-family);
-  cursor: text;
-  position: relative;
-  line-height: 1; color: #111;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-}
+.grid-wrapper { display: flex; flex-direction: column; gap: 8px; width: fit-content; margin: 0 auto; }
+.grid-row { display: flex; border: 2px solid var(--grid-color); position: relative; }
+.grid-cell { width: var(--cell-size); height: var(--cell-size); flex: 0 0 var(--cell-size); border-right: 1px solid var(--grid-color); box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: var(--font-size); font-family: var(--font-family); cursor: text; position: relative; line-height: 1; color: #111; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
 .grid-row .grid-cell:last-child { border-right: none; }
 
-.overflow-cell {
-  position: absolute;
-  right: calc(var(--cell-size) * -1);
-  top: 0;
-  width: var(--cell-size); height: var(--cell-size);
-  display: flex;
-  align-items: center; justify-content: center;
-  font-size: var(--font-size);
-  color: #111;
-  pointer-events: none;
-}
+/* 글자 렌더링 컨테이너 (포인터 이벤트 방지하여 클릭이 셀에 직접 전달되게 함) */
+.cell-char { pointer-events: none; }
+.grid-cell.two-chars .cell-char { font-size: 19px; letter-spacing: 1px; }
 
+/* 복합 문장부호 (마침표 + 따옴표 등) 위치 정렬 */
+.punct-combo { position: relative; width: 100%; height: 100%; display: block; pointer-events: none; }
+.punct-combo .p1 { position: absolute; left: 6px; bottom: 4px; line-height: 1; }
+.punct-combo .p2 { position: absolute; right: 6px; top: 4px; line-height: 1; }
+
+.overflow-cell { position: absolute; right: calc(var(--cell-size) * -1); top: 0; width: var(--cell-size); height: var(--cell-size); display: flex; align-items: center; justify-content: center; font-size: var(--font-size); color: #111; pointer-events: none; }
+/* 여백에 찍히는 마침표/쉼표도 좌측 하단으로 정렬 */
+.overflow-cell.punct-left { justify-content: flex-start; align-items: flex-end; padding-left: 6px; padding-bottom: 4px; }
+
+/* 커서 및 선택 영역 상태 스타일 */
 .grid-cell.cursor-cell { background: rgba(66,133,244,0.15); }
-.grid-cell.cursor-cell::after {
-  content: '';
-  position: absolute;
-  left: 2px; top: 15%; bottom: 15%;
-  width: 2px;
-  background: #2962ff;
-  animation: blink 1s step-end infinite;
-}
+.grid-cell.cursor-cell::after { content: ''; position: absolute; left: 2px; top: 15%; bottom: 15%; width: 2px; background: #2962ff; animation: blink 1s step-end infinite; }
+/* 한 칸에 두 글자가 들어갈 때 커서가 중간에 위치하는 경우 */
+.grid-cell.cursor-cell.cursor-middle::after { left: 50%; transform: translateX(-50%); }
+
 .grid-cell.selected-cell { background: rgba(66,133,244,0.12); }
+/* 절반만 선택된 상태 (투 글자 조합) */
+.grid-cell.selected-left { background: linear-gradient(to right, rgba(66,133,244,0.12) 50%, transparent 50%); }
+.grid-cell.selected-right { background: linear-gradient(to right, transparent 50%, rgba(66,133,244,0.12) 50%); }
+
 .grid-cell.selection-focus-cell { box-shadow: inset 0 0 0 2px rgba(41,98,255,0.25); }
 .grid-cell.composing-cell { background: rgba(255,193,7,0.2); }
 .grid-cell.composing-cell .cell-char { border-bottom: 2px solid #f57c00; padding-bottom: 1px; }
+
+/* 마침표, 쉼표 좌측 하단 정렬 */
 .grid-cell.punct-left { justify-content: flex-start; align-items: flex-end; padding-left: 6px; padding-bottom: 4px; }
 
 @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0; } }
 
 /* ===== HIDDEN INPUT ===== */
-#hiddenInput {
-  position: fixed; left: -100vw; top: 50%; transform: translateY(-50%);
-  width: 100vw; height: 2.5em; opacity: 0; font-size: 16px; border: none;
-  outline: none; resize: none; z-index: 1; padding: 0.2em;
-  color: transparent; background: transparent; caret-color: transparent;
-  -webkit-appearance: none; appearance: none;
-}
+#hiddenInput { position: fixed; left: -100vw; top: 50%; transform: translateY(-50%); width: 100vw; height: 2.5em; opacity: 0; font-size: 16px; border: none; outline: none; resize: none; z-index: 1; padding: 0.2em; color: transparent; background: transparent; caret-color: transparent; -webkit-appearance: none; appearance: none; }
 
 /* ===== TOAST ===== */
-.toast {
-  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-  background: rgba(0,0,0,0.82); color: #fff; padding: 12px 24px;
-  border-radius: 999px; font-size: 14px; opacity: 0; transition: opacity 0.25s;
-  z-index: 9999; font-family: 'Noto Sans KR', sans-serif; pointer-events: none;
-}
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.82); color: #fff; padding: 12px 24px; border-radius: 999px; font-size: 14px; opacity: 0; transition: opacity 0.25s; z-index: 9999; font-family: 'Noto Sans KR', sans-serif; pointer-events: none; }
 .toast.show { opacity: 1; }
 
 /* ===== PRINT ===== */
@@ -486,17 +216,12 @@ html, body {
 <div class="toast" id="toast"></div>
 
 <script>
-/* ===== 모바일 줌(확대/축소) 이벤트 완벽 방지 ===== */
-
-// 더블 탭 / 트리플 탭 확대 방지
+/* ===== 모바일 더블 탭 확대 방지 ===== */
 let lastTouchEnd = 0;
 document.addEventListener('touchend', function(e) {
   const now = (new Date()).getTime();
   if (now - lastTouchEnd <= 300) {
-    // 툴바 버튼류 등 사용자가 의도적으로 빠르게 누를 수 있는 요소는 방지 제외
-    if (!e.target.closest('button') && !e.target.closest('select')) {
-      e.preventDefault();
-    }
+    if (!e.target.closest('button') && !e.target.closest('select')) e.preventDefault();
   }
   lastTouchEnd = now;
 }, { passive: false });
@@ -530,20 +255,15 @@ let historyIndex = -1;
 
 function saveHistory(force = false) {
   const currentState = { c: [...state.chars], s: state.selectionStart, e: state.selectionEnd };
-
   if (!force && historyIndex >= 0) {
     const prev = historyStack[historyIndex];
     if (currentState.c.join('') === prev.c.join('')) return; 
   }
-
-  if (historyIndex < historyStack.length - 1) {
-    historyStack = historyStack.slice(0, historyIndex + 1);
-  }
+  if (historyIndex < historyStack.length - 1) historyStack = historyStack.slice(0, historyIndex + 1);
 
   historyStack.push(currentState);
   if (historyStack.length > MAX_HISTORY) historyStack.shift();
   else historyIndex++;
-  
   updateUndoRedoUI();
 }
 
@@ -553,9 +273,7 @@ function restoreHistory(idx) {
   state.chars = [...item.c];
   state.selectionStart = item.s; state.selectionEnd = item.e; state.cursorPos = item.e;
   historyIndex = idx;
-
-  render(); syncInputFromState(); saveToURL(); scrollToCursor();
-  updateUndoRedoUI(); focusInput();
+  render(); syncInputFromState(); saveToURL(); scrollToCursor(); updateUndoRedoUI(); focusInput();
 }
 
 function undo() { if (historyIndex > 0) restoreHistory(historyIndex - 1); }
@@ -566,7 +284,7 @@ function updateUndoRedoUI() {
   document.querySelectorAll('.btn-redo').forEach(b => b.disabled = historyIndex >= historyStack.length - 1);
 }
 
-/* ===== 단축키 (윈도우/맥) ===== */
+/* ===== 단축키 ===== */
 document.addEventListener('keydown', (e) => {
   const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
   const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
@@ -591,7 +309,6 @@ function setLogicalSelection(start, end = start, opts = {}) {
   const max = state.chars.length;
   const s = clamp(Math.min(start, end), 0, max);
   const e = clamp(Math.max(start, end), 0, max);
-
   state.selectionStart = s; state.selectionEnd = e; state.cursorPos = e;
 
   if (opts.syncInput)  syncInputFromState();
@@ -614,7 +331,6 @@ function applyAutoReplace() {
     if (s > idx + 2) s -= 2; else if (s > idx) s = idx + 1;
     if (e > idx + 2) e -= 2; else if (e > idx) e = idx + 1;
   }
-
   state.chars = text.split('');
   state.selectionStart = s; state.selectionEnd = e; state.cursorPos = e;
   return changed;
@@ -675,9 +391,7 @@ function deleteWordForwardInState() {
 }
 
 function afterStateEdit(save = true) {
-  applyAutoReplace();
-  render();
-  syncInputFromState();
+  applyAutoReplace(); render(); syncInputFromState();
   if (save) { saveToURL(); saveHistory(); }
   scrollToCursor();
 }
@@ -688,10 +402,7 @@ function ensureSentinel() {
   const start = input.selectionStart ?? 0, end = input.selectionEnd ?? start;
   input.value = SENTINEL + input.value.split(SENTINEL).join('');
   try {
-    input.setSelectionRange(
-      Math.max(SENTINEL_LEN, start + SENTINEL_LEN),
-      Math.max(SENTINEL_LEN, end   + SENTINEL_LEN)
-    );
+    input.setSelectionRange(Math.max(SENTINEL_LEN, start + SENTINEL_LEN), Math.max(SENTINEL_LEN, end + SENTINEL_LEN));
   } catch (e) {}
 }
 
@@ -725,8 +436,7 @@ function syncStateFromInput() {
 }
 
 function syncFromNativeInput(save = true) {
-  syncStateFromInput();
-  render();
+  syncStateFromInput(); render();
   if (save) { saveToURL(); saveHistory(); }
   scrollToCursor();
 }
@@ -781,42 +491,83 @@ function applySettings() {
   });
 }
 
-/* ===== 레이아웃 계산 ===== */
+/* ===== 레이아웃 로직 고도화 (글자 그룹핑 적용) ===== */
 function buildLayout() {
   const displayChars = state.chars.slice();
-  const mapToLogical = (dispIdx) => dispIdx;
-
   const pages = [];
   let page = { rows: [] };
   let row  = { cells: [], overflow: null, isNewlineEnded: false, newlineLogicalIdx: -1 };
-  const cursorDisplayIdx = state.cursorPos;
 
   for (let i = 0; i < displayChars.length; i++) {
     const ch = displayChars[i];
     if (ch === '\n') {
-      row.isNewlineEnded = true; row.newlineLogicalIdx = mapToLogical(i);
+      row.isNewlineEnded = true; row.newlineLogicalIdx = i;
       page.rows.push(row);
       if (page.rows.length === ROWS) { pages.push(page); page = { rows: [] }; }
       row = { cells: [], overflow: null, isNewlineEnded: false, newlineLogicalIdx: -1 };
       continue;
     }
-    row.cells.push({ char: ch, logicalIdx: mapToLogical(i), dispIdx: i });
+
+    let cellStr = ch;
+    let charsInCell = 1;
+    let isPunctCombo = false;
+    const nextCh = displayChars[i + 1];
+
+    // 1. 규칙: 마침표/쉼표 바로 뒤에 따옴표가 오면 한 칸으로 병합
+    if ((ch === '.' || ch === ',') && nextCh && /['"”’]/.test(nextCh)) {
+      cellStr += nextCh;
+      charsInCell = 2;
+      isPunctCombo = true;
+    } 
+    // 2. 규칙: 소문자나 숫자가 연속해서 2개 오면 한 칸으로 병합
+    else if (/[a-z0-9]/.test(ch) && nextCh && /[a-z0-9]/.test(nextCh)) {
+      cellStr += nextCh;
+      charsInCell = 2;
+    }
+
+    row.cells.push({
+      char: cellStr, logicalIdx: i, length: charsInCell,
+      isPunctCombo: isPunctCombo, empty: false
+    });
+
+    i += (charsInCell - 1); // 병합된 글자는 루프 인덱스 스킵
+
+    // 오버플로우(여백) 로직
     if (row.cells.length === COLS) {
-      const nextCh = displayChars[i + 1];
-      if (nextCh && nextCh !== '\n' && /^[.,?!'"\u2018\u2019\u201C\u201D ]$/.test(nextCh)) {
-        row.overflow = { char: nextCh, logicalIdx: mapToLogical(i + 1), dispIdx: i + 1 };
-        i++;
+      const nextIdx = i + 1;
+      const lookahead = displayChars[nextIdx];
+      
+      // 줄 마지막 칸을 넘어가는 문장부호 처리
+      if (lookahead && lookahead !== '\n' && /^[.,?!'"”’ ]$/.test(lookahead)) {
+        let overflowStr = lookahead;
+        let overflowLen = 1;
+        let overflowCombo = false;
+        const nextLookahead = displayChars[nextIdx + 1];
+
+        if ((lookahead === '.' || lookahead === ',') && nextLookahead && /['"”’]/.test(nextLookahead)) {
+          overflowStr += nextLookahead;
+          overflowLen = 2;
+          overflowCombo = true;
+        }
+
+        row.overflow = {
+          char: overflowStr, logicalIdx: nextIdx, length: overflowLen,
+          isPunctCombo: overflowCombo
+        };
+        i += overflowLen;
       }
+      
       page.rows.push(row);
       if (page.rows.length === ROWS) { pages.push(page); page = { rows: [] }; }
       row = { cells: [], overflow: null, isNewlineEnded: false, newlineLogicalIdx: -1 };
     }
   }
 
+  // 남은 셀 처리
   if (row.cells.length > 0 || displayChars[displayChars.length - 1] === '\n' || displayChars.length === 0) page.rows.push(row);
-  if (page.rows.length > 0) pages.push(page);
   if (pages.length === 0) pages.push({ rows: [{ cells: [], overflow: null, isNewlineEnded: false, newlineLogicalIdx: -1 }] });
 
+  // 빈 칸(Empty cells) 채워넣기
   let lastLogical = 0;
   for (let pIdx = 0; pIdx < pages.length; pIdx++) {
     const p = pages[pIdx];
@@ -824,15 +575,21 @@ function buildLayout() {
     for (let rIdx = 0; rIdx < ROWS; rIdx++) {
       const r = p.rows[rIdx];
       for (let cIdx = 0; cIdx < COLS; cIdx++) {
-        if (r.cells[cIdx]) lastLogical = r.cells[cIdx].logicalIdx + 1;
-        else r.cells[cIdx] = { char: '', logicalIdx: (r.isNewlineEnded && !r.overflow) ? r.newlineLogicalIdx : lastLogical, dispIdx: -1, empty: true };
+        if (r.cells[cIdx]) {
+          lastLogical = r.cells[cIdx].logicalIdx + r.cells[cIdx].length;
+        } else {
+          r.cells[cIdx] = {
+            char: '', logicalIdx: (r.isNewlineEnded && !r.overflow) ? r.newlineLogicalIdx : lastLogical,
+            length: 1, empty: true
+          };
+        }
       }
-      if (r.overflow)       lastLogical = r.overflow.logicalIdx + 1;
+      if (r.overflow) lastLogical = r.overflow.logicalIdx + r.overflow.length;
       if (r.isNewlineEnded) lastLogical = r.newlineLogicalIdx + 1;
     }
   }
 
-  return { pages, cursorDisplayIdx };
+  return { pages };
 }
 
 /* ===== 렌더 ===== */
@@ -860,31 +617,86 @@ function render() {
       for (let cIdx = 0; cIdx < COLS; cIdx++) {
         const cellData = rowData.cells[cIdx];
         const cellEl   = cells[cIdx];
-        cellEl.querySelector('.cell-char').textContent = cellData.char;
+        
+        // 1. 글자/부호 DOM 주입
+        if (cellData.isPunctCombo) {
+          cellEl.innerHTML = `<span class="punct-combo"><span class="p1">${cellData.char[0]}</span><span class="p2">${cellData.char[1]}</span></span>`;
+        } else {
+          cellEl.innerHTML = `<span class="cell-char">${cellData.char}</span>`;
+        }
         cellEl.dataset.logicalIdx = cellData.logicalIdx;
 
+        // 2. 커서 위치 판별 (글자 사이 절반 커서 포함)
         let isCursor = false;
+        let isCursorMiddle = false;
         if (!selectionActive && !foundCursor) {
-          if (cellData.dispIdx === layout.cursorDisplayIdx) { isCursor = true; foundCursor = true; } 
-          else if (cellData.empty && cellData.logicalIdx >= state.cursorPos) { isCursor = true; foundCursor = true; }
+          if (state.cursorPos === cellData.logicalIdx) {
+            isCursor = true; foundCursor = true;
+          } else if (cellData.length === 2 && state.cursorPos === cellData.logicalIdx + 1) {
+            isCursor = true; isCursorMiddle = true; foundCursor = true;
+          } else if (cellData.empty && cellData.logicalIdx >= state.cursorPos) {
+            isCursor = true; foundCursor = true;
+          }
         }
 
-        const isComposingChar = state.composing && state.cursorPos > 0 && !cellData.empty && cellData.logicalIdx === state.cursorPos - 1;
-        const isSelected = selectionActive && !cellData.empty && cellData.logicalIdx >= state.selectionStart && cellData.logicalIdx < state.selectionEnd;
-        const isSelectionFocus = selectionActive && !cellData.empty && cellData.logicalIdx === state.selectionEnd - 1;
+        // 3. 선택 영역 판별 (절반 선택 포함)
+        let isSelected = false;
+        let isSelectedLeft = false;
+        let isSelectedRight = false;
+        let isSelectionFocus = false;
 
+        if (selectionActive && !cellData.empty) {
+          const s1 = cellData.logicalIdx >= state.selectionStart && cellData.logicalIdx < state.selectionEnd;
+          const s2 = cellData.length === 2 && (cellData.logicalIdx + 1) >= state.selectionStart && (cellData.logicalIdx + 1) < state.selectionEnd;
+
+          if (cellData.length === 1) { if (s1) isSelected = true; } 
+          else {
+            if (s1 && s2) isSelected = true;
+            else if (s1) isSelectedLeft = true;
+            else if (s2) isSelectedRight = true;
+          }
+
+          if (state.selectionEnd - 1 === cellData.logicalIdx) isSelectionFocus = true;
+          if (cellData.length === 2 && state.selectionEnd - 1 === cellData.logicalIdx + 1) isSelectionFocus = true;
+        }
+
+        const isComposingChar = state.composing && state.cursorPos > 0 && !cellData.empty &&
+          ((cellData.logicalIdx === state.cursorPos - 1) || (cellData.length === 2 && cellData.logicalIdx + 1 === state.cursorPos - 1));
+
+        // 4. 클래스 종합 적용
         cellEl.className = 'grid-cell';
-        if (isCursor && !state.composing && !selectionActive) cellEl.classList.add('cursor-cell');
-        if (isSelected)                                       cellEl.classList.add('selected-cell');
-        if (isSelectionFocus)                                 cellEl.classList.add('selection-focus-cell');
-        if (isComposingChar)                                  cellEl.classList.add('composing-cell');
-        if (cellData.char === '.' || cellData.char === ',')   cellEl.classList.add('punct-left');
+        if (cellData.length === 2 && !cellData.isPunctCombo) cellEl.classList.add('two-chars');
+        
+        if (isCursor && !state.composing && !selectionActive) {
+          cellEl.classList.add('cursor-cell');
+          if (isCursorMiddle) cellEl.classList.add('cursor-middle');
+        }
+        
+        if (isSelected) cellEl.classList.add('selected-cell');
+        else if (isSelectedLeft) cellEl.classList.add('selected-left');
+        else if (isSelectedRight) cellEl.classList.add('selected-right');
+        
+        if (isSelectionFocus) cellEl.classList.add('selection-focus-cell');
+        if (isComposingChar) cellEl.classList.add('composing-cell');
+        if (!cellData.isPunctCombo && (cellData.char === '.' || cellData.char === ',')) cellEl.classList.add('punct-left');
       }
 
+      // 5. 오버플로우 (여백 부호)
       let overflowEl = rowEl.querySelector('.overflow-cell');
       if (rowData.overflow) {
         if (!overflowEl) { overflowEl = document.createElement('div'); overflowEl.className = 'overflow-cell'; rowEl.appendChild(overflowEl); }
-        overflowEl.textContent = rowData.overflow.char;
+        
+        if (rowData.overflow.isPunctCombo) {
+          overflowEl.innerHTML = `<span class="punct-combo"><span class="p1">${rowData.overflow.char[0]}</span><span class="p2">${rowData.overflow.char[1]}</span></span>`;
+          overflowEl.classList.remove('punct-left');
+        } else {
+          overflowEl.innerHTML = `<span class="cell-char">${rowData.overflow.char}</span>`;
+          if (rowData.overflow.char === '.' || rowData.overflow.char === ',') {
+            overflowEl.classList.add('punct-left');
+          } else {
+            overflowEl.classList.remove('punct-left');
+          }
+        }
       } else if (overflowEl) overflowEl.remove();
     }
   }
@@ -895,7 +707,7 @@ function createPage(idx) {
   let html = `<div class="page-header"><span class="page-no-label">NO.</span><span class="page-no">${idx + 1}</span></div><div class="grid-wrapper">`;
   for (let r = 0; r < ROWS; r++) {
     html += `<div class="grid-row">`;
-    for (let c = 0; c < COLS; c++) html += `<div class="grid-cell"><span class="cell-char"></span></div>`;
+    for (let c = 0; c < COLS; c++) html += `<div class="grid-cell"></div>`;
     html += `</div>`;
   }
   html += `</div>`;
@@ -903,7 +715,7 @@ function createPage(idx) {
   return page;
 }
 
-/* ===== 포커스 및 터치 처리 ===== */
+/* ===== 포커스 및 터치 처리 (절반 터치 좌표 계산) ===== */
 function focusInput() { input.focus({ preventScroll: true }); }
 
 let touchStartX = 0, touchStartY = 0;
@@ -920,11 +732,15 @@ document.addEventListener('touchend', (e) => {
   const dist = Math.hypot(t.clientX - touchStartX, t.clientY - touchStartY);
 
   if (dist < 12) {
-    e.preventDefault();
     const cell = document.elementFromPoint(t.clientX, t.clientY)?.closest('.grid-cell');
     if (cell) {
-      const idx = parseInt(cell.dataset.logicalIdx, 10);
+      let idx = parseInt(cell.dataset.logicalIdx, 10);
       if (!isNaN(idx)) {
+        // 셀의 우측 절반을 터치했으면 커서를 글자 사이로 이동
+        const rect = cell.getBoundingClientRect();
+        if (cell.classList.contains('two-chars') && (t.clientX - rect.left) > (rect.width / 2)) {
+          idx += 1;
+        }
         state.composing = false;
         setLogicalSelection(idx, idx, { renderView: true, syncInput: true });
       }
@@ -938,8 +754,15 @@ document.addEventListener('pointerdown', (e) => {
   const cell = e.target.closest('.grid-cell');
   if (cell) {
     e.preventDefault();
-    const idx = parseInt(cell.dataset.logicalIdx, 10);
-    if (!isNaN(idx)) { state.composing = false; setLogicalSelection(idx, idx, { renderView: true, syncInput: true }); }
+    let idx = parseInt(cell.dataset.logicalIdx, 10);
+    if (!isNaN(idx)) { 
+      const rect = cell.getBoundingClientRect();
+      if (cell.classList.contains('two-chars') && (e.clientX - rect.left) > (rect.width / 2)) {
+        idx += 1;
+      }
+      state.composing = false; 
+      setLogicalSelection(idx, idx, { renderView: true, syncInput: true }); 
+    }
   } else if (!e.target.closest('.page-container')) return;
   focusInput();
 });
@@ -1091,31 +914,25 @@ function updateToolbarMode() {
   toolbar.classList.remove('compact');
   toolbarMenu.classList.remove('open');
   
-  // 렌더링된 너비 측정
   const availableW = toolbar.clientWidth;
   const titleW = title.offsetWidth;
   const docW = docGroup.offsetWidth;
   const zoomW = zoomGroup.offsetWidth;
   const actionW = actionGroup.offsetWidth;
   
-  // 요소들이 차지하는 영역 (여백 포함 대략적 계산)
-  const leftOccupied = titleW + 16 + docW + 30; // 메뉴 토글 영역 등을 고려한 안전 공간 확보
+  const leftOccupied = titleW + 16 + docW + 30; 
   const rightOccupied = actionW + 20;
   
-  // 중앙 줌 컨트롤의 예상 위치
   const zoomStart = (availableW / 2) - (zoomW / 2);
   const zoomEnd = (availableW / 2) + (zoomW / 2);
   const rightStart = availableW - rightOccupied;
   
-  // 화면이 좁거나, 좌/우측 메뉴들이 중앙 줌 컨트롤과 겹칠 위험이 있으면 모바일 모드로 전환
   let needsCompact = false;
   if (leftOccupied > zoomStart || zoomEnd > rightStart || availableW < 800) {
     needsCompact = true;
   }
   
-  if (needsCompact) {
-    toolbar.classList.add('compact');
-  }
+  if (needsCompact) toolbar.classList.add('compact');
 }
 
 function toggleMenu() {
