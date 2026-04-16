@@ -87,8 +87,19 @@ html, body {
 }
 
 /* ===== PAGE AREA ===== */
-.page-container { position: fixed; top: var(--toolbar-height); left: 0; right: 0; bottom: 0; padding: 28px 0 60px; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
-.zoom-wrapper { display: flex; flex-direction: column; align-items: center; gap: 40px; transform-origin: top center; transition: transform 0.2s ease-out; width: 100%; min-height: min-content; }
+.page-container { 
+  position: fixed; top: var(--toolbar-height); left: 0; right: 0; bottom: 0; 
+  padding: 28px 0 60px; 
+  display: block; /* 플렉스 중앙정렬 해제(가로 스크롤 확보를 위해) */
+  overflow: auto; /* hidden이었던 부분을 auto로 변경하여 상하좌우 스크롤 허용 */
+  -webkit-overflow-scrolling: touch; 
+}
+.zoom-wrapper { 
+  display: flex; flex-direction: column; gap: 40px; 
+  transform-origin: top left; /* 확대 기준점을 상단 중앙에서 좌측 상단으로 변경 */
+  transition: transform 0.1s ease-out; /* 모바일 핀치 줌을 위해 속도를 0.1s로 단축 */
+  width: fit-content; /* 내부 콘텐츠 크기에 맞춤 */
+}
 .page { background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.15); position: relative; width: 794px; height: 1123px; padding: 60px 47px; flex-shrink: 0; }
 .page-header { display: flex; justify-content: flex-end; align-items: baseline; padding: 0 4px 10px 0; font-family: 'Noto Serif KR', serif; color: #333; font-size: 14px; gap: 6px; }
 .page-header .page-no-label { font-size: 12px; color: #555; letter-spacing: 1px; }
@@ -135,6 +146,34 @@ html, body {
 /* ===== HIDDEN INPUT ===== */
 #hiddenInput { position: fixed; left: -100vw; top: 50%; transform: translateY(-50%); width: 100vw; height: 2.5em; opacity: 0; font-size: 16px; border: none; outline: none; resize: none; z-index: 1; padding: 0.2em; color: transparent; background: transparent; caret-color: transparent; -webkit-appearance: none; appearance: none; }
 
+/* ===== 링크 잘림 경고 배너 ===== */
+.truncate-warning {
+  display: none;
+  position: fixed;
+  top: var(--toolbar-height);
+  left: 0;
+  right: 0;
+  background: #e67e22;
+  color: #fff;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 13px;
+  text-align: center;
+  padding: 10px 16px;
+  z-index: 990;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  word-break: keep-all;
+  cursor: pointer;
+}
+.truncate-warning span {
+  opacity: 0.8;
+  font-size: 11px;
+  margin-left: 8px;
+  text-decoration: underline;
+}
+@media print {
+  .truncate-warning { display: none !important; }
+}
+  
 /* ===== TOAST ===== */
 .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.82); color: #fff; padding: 12px 24px; border-radius: 999px; font-size: 14px; opacity: 0; transition: opacity 0.25s; z-index: 9999; font-family: 'Noto Sans KR', sans-serif; pointer-events: none; }
 .toast.show { opacity: 1; }
@@ -204,6 +243,11 @@ html, body {
   </div>
 </div>
 
+<div class="truncate-warning" id="truncateWarning" onclick="this.style.display='none'; document.getElementById('pageContainer').style.top='var(--toolbar-height)';">
+  글자 수 제한으로 링크가 완전하지 않아 글의 일부만 보여집니다. 원고지의 주소 끝까지 붙여넣기 되도록 해주세요. <span>(닫기 ✕)</span>
+</div>  
+
+  
 <div class="page-container" id="pageContainer">
   <div class="zoom-wrapper" id="zoomWrapper"></div>
 </div>
@@ -454,11 +498,19 @@ const LZ = {
     if (!b64) return '';
     try {
       b64 = b64.replace(/-/g,'+').replace(/_/g,'/');
+      
+      // Base64 유효성 보정: 문자열 길이가 4의 배수 기준 1개 남으면 atob에서 무조건 에러가 발생하므로 마지막 글자를 버림
+      if (b64.replace(/=/g, '').length % 4 === 1) {
+        b64 = b64.slice(0, -1);
+      }
+      
       while (b64.length % 4) b64 += '=';
       const bin = atob(b64);
       const bytes = new Uint8Array(bin.length);
       for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-      return new TextDecoder().decode(bytes);
+      
+      // fatal: false 설정으로 깨진 유니코드 문자열이 있어도 에러 없이 살릴 수 있는 데까지 복구함
+      return new TextDecoder('utf-8', { fatal: false }).decode(bytes);
     } catch(e) { return ''; }
   }
 };
@@ -473,12 +525,47 @@ function loadFromURL() {
   const hash = location.hash.slice(1);
   if (!hash) return;
   try {
-    const data = JSON.parse(LZ.decompress(hash));
+    const decompressed = LZ.decompress(hash);
+    let data = {};
+    let isRecovered = false; // 복구 여부 체크 플래그
+    
+    try {
+      // 1차 시도: 정상적인 JSON 파싱
+      data = JSON.parse(decompressed);
+    } catch(e) {
+      // 2차 시도: 링크가 잘려서 파싱에 실패한 경우 강제 복구
+      const tIndex = decompressed.indexOf('"t":"');
+      if (tIndex !== -1) {
+        let textPart = decompressed.slice(tIndex + 5);
+        
+        textPart = textPart.replace(/["}\],]+$/, ''); 
+        textPart = textPart.replace(/\\$/, ''); 
+        data.t = textPart.replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+        
+        isRecovered = true; // 텍스트가 강제 복구되었음을 표시
+      }
+    }
+
     state.chars = data.t ? data.t.split('') : [];
-    state.font  = data.f || state.font; state.color = data.c || state.color;
+    state.font  = data.f || state.font; 
+    state.color = data.c || state.color;
     state.cursorPos = 0; state.selectionStart = 0; state.selectionEnd = 0;
+    
     applySettings();
-  } catch(e) {}
+
+    // 텍스트가 잘린 상태로 복구된 경우 경고창 띄우기
+    if (isRecovered) {
+      const warningEl = document.getElementById('truncateWarning');
+      if (warningEl) {
+        warningEl.style.display = 'block';
+        // 배너가 화면을 가리지 않게 원고지 컨테이너의 시작 위치를 배너 높이만큼 내림
+        document.getElementById('pageContainer').style.top = `calc(var(--toolbar-height) + ${warningEl.offsetHeight}px)`;
+      }
+    }
+
+  } catch(e) {
+    console.error('URL 복구 실패:', e);
+  }
 }
 
 function applySettings() {
@@ -700,6 +787,8 @@ function render() {
       } else if (overflowEl) overflowEl.remove();
     }
   }
+  // 👇 렌더링이 끝난 후 바뀐 페이지 높이에 맞춰 줌 여백을 다시 계산하도록 아래 한 줄 추가
+  applyZoom();
 }
 
 function createPage(idx) {
@@ -892,8 +981,26 @@ function setZoom(action) {
 }
 
 function applyZoom() {
-  document.getElementById('zoomWrapper').style.transform = `scale(${zoomState.scale})`;
+  const wrapper = document.getElementById('zoomWrapper');
+  wrapper.style.transform = `scale(${zoomState.scale})`;
   document.getElementById('zoomLabel').textContent = Math.round(zoomState.scale * 100) + '%';
+  
+  const container = document.getElementById('pageContainer');
+  const rect = wrapper.getBoundingClientRect();
+  
+  // 확대(scale)로 인해 늘어난 크기를 계산하여 오른쪽과 아래에 강제 마진 부여 (스크롤 잘림 방지)
+  const extraWidth = rect.width - wrapper.offsetWidth;
+  const extraHeight = rect.height - wrapper.offsetHeight;
+  
+  wrapper.style.marginRight = `${Math.max(0, extraWidth) + 40}px`; 
+  wrapper.style.marginBottom = `${Math.max(0, extraHeight) + 60}px`;
+  
+  // 화면이 컨테이너보다 작을 때는 자동으로 가운데 정렬, 크면 좌측 20px 여백 적용
+  if (rect.width < container.clientWidth) {
+    wrapper.style.marginLeft = `${(container.clientWidth - rect.width) / 2}px`;
+  } else {
+    wrapper.style.marginLeft = '20px';
+  }
 }
 
 window.addEventListener('resize', () => {
@@ -955,6 +1062,14 @@ function newDocument() {
   if (confirm('모든 내용이 지워집니다. 새로 시작할까요?')) {
     state.chars = []; state.cursorPos = 0; state.selectionStart = 0; state.selectionEnd = 0; state.composing = false;
     historyStack = []; historyIndex = -1; saveHistory(true); 
+    
+    // 새 문서 시작 시 경고창 숨기기
+    const warningEl = document.getElementById('truncateWarning');
+    if (warningEl) {
+      warningEl.style.display = 'none';
+      document.getElementById('pageContainer').style.top = 'var(--toolbar-height)';
+    }
+
     render(); saveToURL(); syncInputFromState(); focusInput(); closeMenuOnCompact();
   }
 }
@@ -977,6 +1092,79 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+  /* ===== PC 드래그 패닝 & 모바일 핀치 줌 ===== */
+const pageContainerEl = document.getElementById('pageContainer');
+
+// [1] PC 마우스 드래그로 화면 상하좌우 이동 기능
+let isPanning = false;
+let startPanX = 0, startPanY = 0;
+let startScrollLeft = 0, startScrollTop = 0;
+
+pageContainerEl.addEventListener('mousedown', (e) => {
+  // 툴바 클릭이거나, 왼쪽 마우스 버튼이 아니면 무시
+  if (e.button !== 0 || e.target.closest('.toolbar') || e.target.tagName === 'BUTTON') return;
+  isPanning = true;
+  startPanX = e.clientX;
+  startPanY = e.clientY;
+  startScrollLeft = pageContainerEl.scrollLeft;
+  startScrollTop = pageContainerEl.scrollTop;
+  pageContainerEl.style.cursor = 'grabbing';
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (!isPanning) return;
+  e.preventDefault(); // 텍스트 선택 등 방지
+  pageContainerEl.scrollLeft = startScrollLeft - (e.clientX - startPanX);
+  pageContainerEl.scrollTop = startScrollTop - (e.clientY - startPanY);
+});
+
+window.addEventListener('mouseup', () => {
+  if (isPanning) {
+    isPanning = false;
+    pageContainerEl.style.cursor = '';
+  }
+});
+
+// [2] 모바일 두 손가락 핀치 줌 기능
+let initialPinchDistance = null;
+let initialZoomScale = 1;
+
+pageContainerEl.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 2) {
+    initialPinchDistance = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    initialZoomScale = zoomState.scale;
+  }
+}, { passive: true });
+
+pageContainerEl.addEventListener('touchmove', (e) => {
+  if (e.touches.length === 2 && initialPinchDistance) {
+    e.preventDefault(); // 브라우저 기본 스크롤 및 화면 튕김 방지
+    const currentDistance = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    const ratio = currentDistance / initialPinchDistance;
+    let newScale = initialZoomScale * ratio;
+    
+    // 확대/축소 제한 범위 (0.25배 ~ 3배)
+    newScale = Math.min(3.0, Math.max(0.25, newScale));
+    zoomState.mode = 'custom';
+    zoomState.scale = newScale;
+    
+    applyZoom();
+  }
+}, { passive: false });
+
+pageContainerEl.addEventListener('touchend', (e) => {
+  if (e.touches.length < 2) {
+    initialPinchDistance = null;
+  }
+});
+
+  
 /* ===== 초기화 ===== */
 document.addEventListener('DOMContentLoaded', () => {
   loadFromURL(); applySettings(); render(); syncInputFromState();
