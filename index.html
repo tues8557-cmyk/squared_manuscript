@@ -195,20 +195,29 @@ html, body {
 /* ===== PRINT ===== */
 @media print {
   /*
-   * ── A4 인쇄 수정 (iOS/iPadOS Safari 포함) ──────────────────────────────
+   * ── A4 인쇄 (iOS/iPadOS Safari + PC 공통) ─────────────────────────────
    *
-   * 문제 원인:
-   *   - .page 는 픽셀 기반 고정 크기(794×1123px)로 설계됨
-   *   - iOS/iPadOS Safari 는 @page margin:0 을 무시하고 자체 여백을 추가함
-   *   - 결과적으로 794px 너비가 인쇄 영역을 초과해 잘리거나 넘침
+   * 핵심 원리:
+   *   transform: scale()은 시각적 크기만 줄이고 레이아웃 공간은 원래 크기로 유지.
+   *   → .page { height: 1123px; transform: scale(0.84) } 이면
+   *     레이아웃 높이는 여전히 1123px이므로 인쇄 시 빈 공간 → 빈 페이지 발생.
    *
-   * 해결 전략:
-   *   1. @page margin 을 0 으로 선언하되, .page 에 충분한 내부 여백 부여
-   *   2. .page 를 mm 단위로 A4 크기 그대로 선언 (210×297mm)
-   *   3. 내부 .grid-wrapper 는 scale 로 축소하여 용지 안에 완전히 수납
-   *      - .page 내부 패딩 제외 실사용 너비(700px) → 180mm(≈680px) 목표
-   *      - scale ≈ 680/700 ≈ 0.971 이지만, iOS 안전 여유 포함 0.93 적용
-   *   4. transform 으로 생긴 빈 공간은 음수 margin 으로 상쇄
+   * 해결:
+   *   scale 대신 .page 자체를 mm 단위로 재정의하고,
+   *   내부 컨텐츠 전체(page-header + grid-wrapper)를 함께 scale 축소.
+   *   이렇게 하면 페이지 번호와 원고지 비율이 동일하게 유지됨.
+   *
+   *   .page = 210mm × 297mm (A4 그대로)
+   *   내부 .page-inner 래퍼로 원래 794px 레이아웃을 감싸고 scale 축소
+   *
+   *   → 단, 현재 HTML 구조에 .page-inner가 없으므로
+   *     .page-header + .grid-wrapper를 묶는 대신
+   *     .page 자체를 A4 mm로 선언하고 flex로 중앙 정렬,
+   *     .grid-wrapper와 .page-header 양쪽에 동일 scale 적용.
+   *
+   * scale 값 = 0.84 (사용자 확인값)
+   *   - 794px × 0.84 ≈ 667px ≈ 176mm → 190mm 인쇄 영역 내 수납 OK
+   *   - page-header, grid-wrapper 모두 동일 scale → 상대 위치 유지
    * ──────────────────────────────────────────────────────────────────────
    */
   @page {
@@ -217,7 +226,7 @@ html, body {
   }
 
   html, body {
-    width: 210mm !important;
+    width: 100% !important;
     height: auto !important;
     overflow: visible !important;
     background: #fff !important;
@@ -233,7 +242,7 @@ html, body {
     position: static !important;
     padding: 0 !important;
     display: block !important;
-    width: 210mm !important;
+    width: 100% !important;
     height: auto !important;
     overflow: visible !important;
     top: 0 !important;
@@ -242,7 +251,7 @@ html, body {
   .zoom-wrapper {
     transform: none !important;
     display: block !important;
-    width: 210mm !important;
+    width: 100% !important;
     height: auto !important;
     overflow: visible !important;
     gap: 0 !important;
@@ -250,21 +259,38 @@ html, body {
     padding: 0 !important;
   }
 
+  /*
+   * .page = A4 mm 크기로 선언.
+   * 내부 컨텐츠는 scale로 줄이므로 overflow: hidden으로 잘림 방지.
+   * height를 297mm로 고정하면 iOS Safari 여백 때문에 빈 페이지 발생.
+   * → height: auto + min-height로 대체.
+   *
+   * 빈 페이지 방지 핵심:
+   *   page-break-after: always 를 쓰되, .page 높이가 한 인쇄 페이지를
+   *   초과하지 않아야 함.
+   *   scale(0.84) 후 1123px → 943px ≈ 250mm → iOS 실질 인쇄 높이(~230mm) 초과
+   *   → height를 auto + max-height로 제어하거나,
+   *     .page 자체를 mm 단위로 선언해야 함.
+   *
+   * 최종 선택:
+   *   .page { width: 210mm; height: 297mm; overflow: hidden }
+   *   → iOS Safari가 자체 여백 추가 시 297mm가 실 용지보다 커져 빈 페이지 발생
+   *   → height를 250mm(= 1123px × 0.84 ≈ 943px → CSS 96dpi 기준 250mm)로 줄여
+   *     iOS 여백 포함 297mm 안에 수납
+   */
   .page {
-    /* A4 용지 크기 그대로 mm 단위로 고정 */
     width: 210mm !important;
-    height: 297mm !important;
-    padding: 15mm 10mm !important;
-    margin: 0 !important;
+    height: 250mm !important;      /* scale(0.84) 후 시각 높이 ≈ 943px ≈ 250mm */
+    padding: 0 !important;
+    margin: 0 auto !important;
     box-shadow: none !important;
     overflow: hidden !important;
     box-sizing: border-box !important;
     display: flex !important;
     flex-direction: column !important;
-    align-items: center !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
 
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
     page-break-after: always !important;
     break-after: page !important;
 
@@ -278,36 +304,40 @@ html, body {
   }
 
   /*
-   * 핵심: grid-wrapper 를 scale 로 축소
-   *   - 20열 × 35px + 테두리 = 약 702px
-   *   - 인쇄 가능 너비: 210mm - 좌우 패딩(10mm×2) = 190mm ≈ 718px (CSS 96dpi 기준)
-   *   - iOS Safari 는 실제 PPI 사용 → 더 보수적으로 scale 0.9 적용
-   *   - scale 0.9 후 실제 너비 = 702×0.9 = 632px ≈ 167mm → 충분히 여유 있음
-   *   - transform 후 생기는 빈 공간(하단): height×(1-scale) = 약 -70px 보정
+   * page-header와 grid-wrapper를 함께 scale(0.84) 축소.
+   * 두 요소가 동일 비율로 줄어들므로 서로 간의 간격/위치 비율 유지됨.
+   *
+   * scale 후 레이아웃 공간 보정:
+   *   page-header 원래 높이 ≈ 40px → scale 후 시각 높이 ≈ 34px, 레이아웃 여전히 40px
+   *   grid-wrapper 원래 높이 ≈ 760px → scale 후 시각 높이 ≈ 638px, 레이아웃 여전히 760px
+   *   → margin-bottom 음수로 빈 공간 제거
+   *
+   *   scale로 생기는 가로 빈 공간 = 794 × (1-0.84) / 2 = 63px 씩 좌우
+   *   → transform-origin: top left 후 margin-right 음수, 또는 top center 유지
    */
-  .grid-wrapper {
-    transform: scale(0.9) !important;
-    transform-origin: top center !important;
-    /* 스케일로 줄어든 높이만큼 빈 공간 제거 */
-    margin-bottom: -72px !important;
-  }
-
   .page-header {
     display: flex !important;
     justify-content: flex-end !important;
     align-items: baseline !important;
     gap: 6px !important;
-    width: 100% !important;
-    text-align: right !important;
-    padding: 0 4px 6px 0 !important;
+    width: 794px !important;       /* 원래 .page 너비 유지 */
+    padding: 60px 47px 0 !important;
+    box-sizing: border-box !important;
+    transform: scale(0.84) !important;
+    transform-origin: top left !important;
+    margin-bottom: -6px !important; /* scale 후 레이아웃 공간 보정 (40 × 0.16 = 6.4px) */
     flex-shrink: 0 !important;
   }
-  .page-header .page-no-label,
-  .page-header .page-no {
-    width: auto !important;
-    display: inline !important;
-    flex: none !important;
-    text-align: inherit !important;
+
+  .grid-wrapper {
+    width: 794px !important;       /* 원래 .page 너비 유지 */
+    padding: 0 47px !important;
+    box-sizing: border-box !important;
+    transform: scale(0.84) !important;
+    transform-origin: top left !important;
+    /* grid-wrapper 원래 높이: ROWS(20) × cell(35px) + row-gap(8px×19) + border ≈ 860px */
+    /* scale 후 시각 높이 ≈ 722px, 레이아웃 공간 여전히 860px → 보정: 860×0.16 ≈ 138px */
+    margin-bottom: -138px !important;
   }
 }
 </style>
