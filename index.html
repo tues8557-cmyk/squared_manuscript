@@ -195,12 +195,41 @@ html, body {
 /* ===== PRINT ===== */
 @media print {
   @page { size: A4 portrait; margin: 0; }
-  html, body { width: auto !important; height: auto !important; overflow: visible !important; background: #fff !important; margin: 0 !important; padding: 0 !important; }
-  .toolbar, .toast, #hiddenInput { display: none !important; }
-  .page-container { position: static !important; padding: 0 !important; display: block !important; width: auto !important; height: auto !important; overflow: visible !important; }
-  .zoom-wrapper { transform: none !important; display: block !important; width: auto !important; height: auto !important; overflow: visible !important; gap: 0 !important; margin: 0 auto !important; }
-  .page { width: 209mm !important; height: 296mm !important; margin: 0 auto !important; padding: 60px 47px !important; box-shadow: none !important; overflow: hidden !important; page-break-after: always; break-after: page; -webkit-print-color-adjust: exact; print-color-adjust: exact; box-sizing: border-box !important; }
-  .page:last-child { page-break-after: auto; break-after: auto; }
+  html, body { width: 100% !important; height: auto !important; overflow: visible !important; background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  
+  /* 불필요한 UI 요소 숨김 */
+  .toolbar, .toast, #hiddenInput, .truncate-warning { display: none !important; }
+  
+  .page-container { position: static !important; padding: 0 !important; display: block !important; width: 100% !important; height: auto !important; overflow: visible !important; }
+  .zoom-wrapper { transform: none !important; display: block !important; width: 100% !important; height: auto !important; overflow: visible !important; gap: 0 !important; margin: 0 auto !important; }
+  
+  /* 핵심 변경: mm 단위 대신 픽셀(px) 단위를 사용하여 모바일 브라우저의 '페이지에 맞춤' 자동 축소를 유도합니다. */
+  .page { 
+    width: 794px !important; 
+    height: 1123px !important; 
+    margin: 0 auto !important; 
+    padding: 60px 47px !important; 
+    box-shadow: none !important; 
+    overflow: hidden !important; 
+    
+    /* 페이지 내에서 잘리지 않도록 보호 */
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    
+    page-break-after: always !important; 
+    break-after: page !important; 
+    
+    -webkit-print-color-adjust: exact; 
+    print-color-adjust: exact; 
+    box-sizing: border-box !important; 
+  }
+  
+  /* 마지막 페이지 뒤에 불필요한 빈 페이지가 생기지 않도록 확실히 차단합니다. */
+  .page:last-of-type { 
+    page-break-after: auto !important; 
+    break-after: auto !important; 
+  }
+  
   .page-header { display: flex !important; justify-content: flex-end !important; align-items: baseline !important; gap: 6px !important; width: auto !important; text-align: right !important; padding: 0 4px 10px 0 !important; }
   .page-header .page-no-label, .page-header .page-no { width: auto !important; display: inline !important; flex: none !important; text-align: inherit !important; }
 }
