@@ -7,7 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Nanum+Myeongjo:wght@400;700&family=Nanum+Gothic:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 
@@ -264,6 +265,7 @@ html, body {
 
     <div class="toolbar-group action-group">
       <button class="btn-primary" onclick="doPrint()">🖨️ 인쇄</button>
+      <button class="btn-primary" onclick="doPDF()" style="background: #e67e22 !important; border-color: #d35400 !important;">📄 PDF받기</button>
       <button onclick="copyURL()">🔗 주소 복사</button>
       <button onclick="copyText()">📋 텍스트 복사</button>
     </div>
@@ -1092,6 +1094,61 @@ function closeMenuOnCompact() {
 }
 
 /* ===== 액션 ===== */
+/* ===== PDF 변환 ===== */
+function doPDF() {
+  closeMenuOnCompact();
+  showToast('PDF 변환 중입니다. 잠시만 기다려주세요...');
+
+  const wrapper = document.getElementById('zoomWrapper');
+  
+  // 1. 선명한 PDF 캡처를 위해 줌 배율 100% 초기화 및 페이지 간 여백(gap) 임시 제거
+  const originalScale = zoomState.scale;
+  const originalMode = zoomState.mode;
+  const originalGap = wrapper.style.gap;
+  
+  zoomState.mode = 'custom';
+  zoomState.scale = 1.0;
+  wrapper.style.gap = '0px';
+  applyZoom();
+
+  // 2. html2pdf 옵션 설정
+  const opt = {
+    margin: 0,
+    filename: '원고지.pdf',
+    image: { type: 'jpeg', quality: 1.0 },
+    html2canvas: {
+      scale: 2,           // 고해상도 캡처
+      useCORS: true,
+      scrollY: 0,
+      windowWidth: 850    // 모바일 등 좁은 화면에서도 PC 레이아웃으로 캡처되도록 강제 지정
+    },
+    jsPDF: { 
+      unit: 'px', 
+      format: [794, 1123], // 원고지 1장 픽셀 크기에 정확히 맞춤 (높이가 넘어가면 자동으로 다음 페이지로 분할됨)
+      orientation: 'portrait' 
+    }
+  };
+
+  // 3. 변환 및 다운로드
+  html2pdf().set(opt).from(wrapper).save().then(() => {
+    // 4. 완료 후 원래 배율 및 여백 상태로 복구
+    zoomState.scale = originalScale;
+    zoomState.mode = originalMode;
+    wrapper.style.gap = originalGap || '40px';
+    applyZoom();
+    showToast('PDF 다운로드가 완료되었습니다.');
+  }).catch(err => {
+    console.error('PDF 변환 오류:', err);
+    showToast('PDF 변환 중 오류가 발생했습니다.');
+    
+    // 에러 시에도 원상 복구
+    zoomState.scale = originalScale;
+    zoomState.mode = originalMode;
+    wrapper.style.gap = originalGap || '40px';
+    applyZoom();
+  });
+}
+  
 function newDocument() {
   if (confirm('모든 내용이 지워집니다. 새로 시작할까요?')) {
     state.chars = []; state.cursorPos = 0; state.selectionStart = 0; state.selectionEnd = 0; state.composing = false;
